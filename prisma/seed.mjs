@@ -1,5 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -14,7 +13,9 @@ async function main() {
 
   // Create/update admin user if credentials are provided
   if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
-    const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
+    // Import bcrypt dynamically for ESM compatibility
+    const bcrypt = await import('bcryptjs');
+    const hashedPassword = await bcrypt.default.hash(process.env.ADMIN_PASSWORD, 10);
     
     const admin = await prisma.user.upsert({
       where: { email: process.env.ADMIN_EMAIL },

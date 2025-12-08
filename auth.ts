@@ -2,7 +2,7 @@ import NextAuth from "next-auth"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import Credentials from "next-auth/providers/credentials"
 import prisma from "@/lib/prisma"
-import bcrypt from "bcryptjs"
+import { userRepo } from "@/lib/repo"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -22,20 +22,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
-        })
-
-        if (!user || !user.password) {
-          return null
-        }
-
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password as string,
-          user.password
+        const user = await userRepo.verifyPassword(
+          credentials.email as string,
+          credentials.password as string
         )
 
-        if (!isPasswordValid) {
+        if (!user) {
           return null
         }
 
