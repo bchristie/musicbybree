@@ -103,7 +103,7 @@ self.addEventListener('fetch', (event) => {
                 <head>
                   <meta charset="UTF-8">
                   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                  <title>Offline - Vocal Portfolio</title>
+                  <title>Offline - __SITE_NAME__</title>
                   <style>
                     body {
                       font-family: system-ui, -apple-system, sans-serif;

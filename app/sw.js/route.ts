@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { SITE_CONFIG } from '@/lib/site-config';
 
 export const dynamic = 'force-static';
 export const runtime = 'nodejs';
@@ -15,7 +16,9 @@ export async function GET() {
   const template = readFileSync(templatePath, 'utf8');
 
   // Replace placeholders
-  const serviceWorkerContent = template.replace(/__VERSION__/g, version);
+  const serviceWorkerContent = template
+    .replace(/__VERSION__/g, version)
+    .replace(/__SITE_NAME__/g, SITE_CONFIG.name);
 
   return new NextResponse(serviceWorkerContent, {
     headers: {

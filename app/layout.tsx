@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegistration } from "@/components/service-worker-registration";
+import { SITE_CONFIG } from "@/lib/site-config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Music by Bree",
-  description: "Professional vocal performance repertoire and showcase",
+  title: SITE_CONFIG.title,
+  description: SITE_CONFIG.description,
   manifest: "/manifest.json",
   viewport: {
     width: "device-width",
@@ -25,21 +26,21 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Music by Bree",
+    title: SITE_CONFIG.title,
   },
   formatDetection: {
     telephone: false,
   },
   openGraph: {
     type: "website",
-    siteName: "Music by Bree",
-    title: "Music by Bree",
-    description: "Professional vocal performance repertoire and showcase",
+    siteName: SITE_CONFIG.name,
+    title: SITE_CONFIG.title,
+    description: SITE_CONFIG.description,
   },
   twitter: {
     card: "summary",
-    title: "Music by Bree",
-    description: "Professional vocal performance repertoire and showcase",
+    title: SITE_CONFIG.title,
+    description: SITE_CONFIG.description,
   },
 };
 

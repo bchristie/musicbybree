@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { SITE_CONFIG } from "@/lib/site-config";
 
 export function PublicHeader() {
   const pathname = usePathname();
@@ -37,7 +38,7 @@ export function PublicHeader() {
       <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/50 backdrop-blur-sm sticky top-0 z-50">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link href="/" className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
-            Music by Bree
+            {SITE_CONFIG.name}
           </Link>
 
           {/* Desktop Navigation */}
