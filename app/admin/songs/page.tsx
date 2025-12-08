@@ -1,6 +1,15 @@
 import Link from "next/link";
 
-export default function AdminSongsPage() {
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+
+export default async function AdminSongs() {
+  const session = await auth();
+  
+  if (!session) {
+    redirect("/admin/login");
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">

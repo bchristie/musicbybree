@@ -1,6 +1,14 @@
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 
-export default function AdminDashboard() {
+export default async function AdminDashboard() {
+  const session = await auth();
+  
+  if (!session) {
+    redirect("/admin/login");
+  }
+
   return (
     <div className="space-y-8">
       <div>

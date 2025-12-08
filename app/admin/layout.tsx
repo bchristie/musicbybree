@@ -6,14 +6,12 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Only render the admin chrome for authenticated users
-  // The login page has its own layout, so unauthenticated users
-  // accessing other admin pages will be redirected by middleware
   const session = await auth();
 
   if (!session) {
     // Return the children without the admin layout
     // This allows the login page to render
+    // Admin pages will handle their own redirects
     return <>{children}</>;
   }
 
