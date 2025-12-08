@@ -96,6 +96,7 @@ model Song {
   artist       Artist              @relation(fields: [artistId], references: [id], onDelete: Cascade)
   tags         SongTag[]
   performances PerformanceSong[]
+  lyric        Lyric?
 
   @@index([title])
   @@index([artistId])
@@ -146,4 +147,31 @@ model PerformanceSong {
 
   @@id([performanceId, songId])
   @@index([order])
+}
+
+// Lyrics models for displaying timed lyrics
+model Lyric {
+  id         String   @id @default(cuid())
+  songId     String   @unique
+  hasTiming  Boolean  @default(false) // Whether timing data is available
+  source     String?  // "manual", "musixmatch", "imported", etc.
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  song  Song         @relation(fields: [songId], references: [id], onDelete: Cascade)
+  lines LyricLine[]
+
+  @@index([songId])
+}
+
+model LyricLine {
+  id       String  @id @default(cuid())
+  lyricId  String
+  time     Float?  // Seconds from start (null if hasTiming is false)
+  text     String
+  order    Int     // Line number for display order
+
+  lyric Lyric @relation(fields: [lyricId], references: [id], onDelete: Cascade)
+
+  @@index([lyricId, order])
 }
