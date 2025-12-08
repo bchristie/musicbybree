@@ -17,6 +17,11 @@ export const metadata: Metadata = {
   title: "Vocal Artist Portfolio",
   description: "Professional vocal performance repertoire and showcase",
   manifest: "/manifest.json",
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -44,9 +49,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="overflow-x-hidden">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden`}
       >
         <ServiceWorkerRegistration />
         {children}

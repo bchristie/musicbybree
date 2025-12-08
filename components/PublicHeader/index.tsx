@@ -101,7 +101,13 @@ export function PublicHeader() {
           </div>
           
           {/* Theme toggle at bottom of drawer */}
-          <div className="p-6 border-t border-zinc-200 dark:border-zinc-800">
+          <div className="p-6 border-t border-zinc-200 dark:border-zinc-800 space-y-4">
+            <Link
+              href="/admin/login"
+              className="block text-sm text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors"
+            >
+              Admin Login
+            </Link>
             <div className="flex items-center justify-between">
               <span className="text-sm text-zinc-600 dark:text-zinc-400">Theme</span>
               <ThemeToggle />
