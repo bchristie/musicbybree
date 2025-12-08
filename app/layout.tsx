@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Vocal Artist Portfolio",
+  title: "Music by Bree",
   description: "Professional vocal performance repertoire and showcase",
   manifest: "/manifest.json",
   viewport: {
@@ -25,20 +25,20 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Vocal Portfolio",
+    title: "Music by Bree",
   },
   formatDetection: {
     telephone: false,
   },
   openGraph: {
     type: "website",
-    siteName: "Vocal Artist Portfolio",
-    title: "Vocal Artist Portfolio",
+    siteName: "Music by Bree",
+    title: "Music by Bree",
     description: "Professional vocal performance repertoire and showcase",
   },
   twitter: {
     card: "summary",
-    title: "Vocal Artist Portfolio",
+    title: "Music by Bree",
     description: "Professional vocal performance repertoire and showcase",
   },
 };
