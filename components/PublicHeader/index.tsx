@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function PublicHeader() {
   const pathname = usePathname();
@@ -40,7 +41,7 @@ export function PublicHeader() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex gap-6">
+          <div className="hidden md:flex items-center gap-6">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -54,6 +55,7 @@ export function PublicHeader() {
                 {link.label}
               </Link>
             ))}
+            <ThemeToggle />
           </div>
 
           {/* Mobile Menu Button */}
@@ -81,20 +83,30 @@ export function PublicHeader() {
           isMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <nav className="flex flex-col p-6 gap-4">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={
-                pathname === link.href
-                  ? "text-zinc-900 dark:text-zinc-50 font-medium text-lg"
-                  : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors text-lg"
-              }
-            >
-              {link.label}
-            </Link>
-          ))}
+        <nav className="flex flex-col h-full">
+          <div className="flex flex-col p-6 gap-4 flex-1">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={
+                  pathname === link.href
+                    ? "text-zinc-900 dark:text-zinc-50 font-medium text-lg"
+                    : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors text-lg"
+                }
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+          
+          {/* Theme toggle at bottom of drawer */}
+          <div className="p-6 border-t border-zinc-200 dark:border-zinc-800">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-zinc-600 dark:text-zinc-400">Theme</span>
+              <ThemeToggle />
+            </div>
+          </div>
         </nav>
       </div>
     </>
