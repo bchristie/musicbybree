@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { generateSongSlug, generateUniqueSlug } from "@/lib/slug";
+import { cache } from "@/lib/cache";
 import type { Song, Prisma } from "@prisma/client";
 
 /**
@@ -142,6 +143,9 @@ export const songRepo = {
         ...data,
         id: slug,
       },
+    }).then((song) => {
+      cache.revalidateSongs();
+      return song;
     });
   },
 
@@ -192,6 +196,9 @@ export const songRepo = {
           },
         },
       },
+    }).then((song) => {
+      cache.revalidateSongs();
+      return song;
     });
   },
 
@@ -202,6 +209,9 @@ export const songRepo = {
     return prisma.song.update({
       where: { id },
       data,
+    }).then((song) => {
+      cache.revalidateSong(id);
+      return song;
     });
   },
 
@@ -240,6 +250,9 @@ export const songRepo = {
   async delete(id: string): Promise<Song> {
     return prisma.song.delete({
       where: { id },
+    }).then((song) => {
+      cache.revalidateSongs();
+      return song;
     });
   },
 

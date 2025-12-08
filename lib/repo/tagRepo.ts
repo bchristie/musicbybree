@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { generateTagSlug, generateUniqueSlug } from "@/lib/slug";
+import { cache } from "@/lib/cache";
 import type { Tag, Prisma } from "@prisma/client";
 
 /**
@@ -98,6 +99,9 @@ export const tagRepo = {
         ...data,
         id: slug,
       },
+    }).then((tag) => {
+      cache.revalidateTags();
+      return tag;
     });
   },
 

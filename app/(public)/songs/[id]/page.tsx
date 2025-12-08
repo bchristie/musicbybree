@@ -3,6 +3,35 @@ import Link from "next/link";
 import { songRepo } from "@/lib/repo";
 import { Music, Clock, User } from "lucide-react";
 
+// Revalidate every 60 seconds (ISR)
+export const revalidate = 60;
+
+// Generate static params for all songs at build time
+export async function generateStaticParams() {
+  const songs = await songRepo.findAll();
+  
+  return songs.map((song) => ({
+    id: song.id,
+  }));
+}
+
+// Generate metadata for SEO
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const song = await songRepo.findById(id);
+
+  if (!song) {
+    return {
+      title: "Song Not Found",
+    };
+  }
+
+  return {
+    title: `${song.title} by ${song.artist.name}`,
+    description: song.notes || `${song.title} - A song by ${song.artist.name}`,
+  };
+}
+
 interface SongDetailPageProps {
   params: Promise<{
     id: string;

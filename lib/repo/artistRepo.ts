@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { generateArtistSlug, generateUniqueSlug } from "@/lib/slug";
+import { cache } from "@/lib/cache";
 import type { Artist, Prisma } from "@prisma/client";
 
 /**
@@ -85,6 +86,9 @@ export const artistRepo = {
         ...data,
         id: slug,
       },
+    }).then((artist) => {
+      cache.revalidateArtists();
+      return artist;
     });
   },
 
