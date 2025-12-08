@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { generateSongSlug, generateUniqueSlug } from "@/lib/slug";
 import type { Song, Prisma } from "@prisma/client";
 
 /**
@@ -111,11 +112,36 @@ export const songRepo = {
   },
 
   /**
-   * Create a new song
+   * Create a new song with auto-generated slug
    */
-  async create(data: Prisma.SongCreateInput): Promise<Song> {
+  async create(data: Omit<Prisma.SongCreateInput, "id">): Promise<Song> {
+    // Get artist name for slug generation
+    const artist = await prisma.artist.findUnique({
+      where: { id: typeof data.artist === 'string' ? data.artist : (data.artist as any).connect?.id },
+      select: { name: true },
+    });
+
+    if (!artist) {
+      throw new Error("Artist not found");
+    }
+
+    const baseSlug = generateSongSlug(artist.name, data.title);
+    const existingSongs = await prisma.song.findMany({
+      where: {
+        id: {
+          startsWith: baseSlug,
+        },
+      },
+      select: { id: true },
+    });
+    const existingSlugs = existingSongs.map((s) => s.id);
+    const slug = generateUniqueSlug(baseSlug, existingSlugs);
+
     return prisma.song.create({
-      data,
+      data: {
+        ...data,
+        id: slug,
+      },
     });
   },
 
@@ -123,12 +149,35 @@ export const songRepo = {
    * Create a song with tags
    */
   async createWithTags(
-    data: Omit<Prisma.SongCreateInput, "tags">,
+    data: Omit<Prisma.SongCreateInput, "tags" | "id">,
     tagIds: string[]
   ) {
+    // Get artist name for slug generation
+    const artist = await prisma.artist.findUnique({
+      where: { id: typeof data.artist === 'string' ? data.artist : (data.artist as any).connect?.id },
+      select: { name: true },
+    });
+
+    if (!artist) {
+      throw new Error("Artist not found");
+    }
+
+    const baseSlug = generateSongSlug(artist.name, data.title);
+    const existingSongs = await prisma.song.findMany({
+      where: {
+        id: {
+          startsWith: baseSlug,
+        },
+      },
+      select: { id: true },
+    });
+    const existingSlugs = existingSongs.map((s) => s.id);
+    const slug = generateUniqueSlug(baseSlug, existingSlugs);
+
     return prisma.song.create({
       data: {
         ...data,
+        id: slug,
         tags: {
           create: tagIds.map((tagId) => ({
             tag: { connect: { id: tagId } },

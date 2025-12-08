@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { generateTagSlug, generateUniqueSlug } from "@/lib/slug";
 import type { Tag, Prisma } from "@prisma/client";
 
 /**
@@ -77,11 +78,26 @@ export const tagRepo = {
   },
 
   /**
-   * Create a new tag
+   * Create a new tag with auto-generated slug
    */
-  async create(data: Prisma.TagCreateInput): Promise<Tag> {
+  async create(data: Omit<Prisma.TagCreateInput, "id">): Promise<Tag> {
+    const baseSlug = generateTagSlug(data.name);
+    const existingTags = await prisma.tag.findMany({
+      where: {
+        id: {
+          startsWith: baseSlug,
+        },
+      },
+      select: { id: true },
+    });
+    const existingSlugs = existingTags.map((t) => t.id);
+    const slug = generateUniqueSlug(baseSlug, existingSlugs);
+
     return prisma.tag.create({
-      data,
+      data: {
+        ...data,
+        id: slug,
+      },
     });
   },
 

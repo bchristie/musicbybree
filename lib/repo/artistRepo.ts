@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { generateArtistSlug, generateUniqueSlug } from "@/lib/slug";
 import type { Artist, Prisma } from "@prisma/client";
 
 /**
@@ -64,11 +65,26 @@ export const artistRepo = {
   },
 
   /**
-   * Create a new artist
+   * Create a new artist with auto-generated slug
    */
-  async create(data: Prisma.ArtistCreateInput): Promise<Artist> {
+  async create(data: Omit<Prisma.ArtistCreateInput, "id">): Promise<Artist> {
+    const baseSlug = generateArtistSlug(data.name);
+    const existingArtists = await prisma.artist.findMany({
+      where: {
+        id: {
+          startsWith: baseSlug,
+        },
+      },
+      select: { id: true },
+    });
+    const existingSlugs = existingArtists.map((a) => a.id);
+    const slug = generateUniqueSlug(baseSlug, existingSlugs);
+
     return prisma.artist.create({
-      data,
+      data: {
+        ...data,
+        id: slug,
+      },
     });
   },
 

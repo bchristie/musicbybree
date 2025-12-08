@@ -2,11 +2,48 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// Slug generation utility
+function slugify(text) {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/\-\-+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '');
+}
+
+function generateArtistSlug(name) {
+  return slugify(name);
+}
+
+function generateTagSlug(name) {
+  return slugify(name);
+}
+
+function generateSongSlug(artistName, songTitle) {
+  const artistSlug = slugify(artistName);
+  const songSlug = slugify(songTitle);
+  return `${artistSlug}-${songSlug}`;
+}
+
 async function main() {
   // Only run seed if PRISMA_SEED environment variable is set to 'true'
   if (process.env.PRISMA_SEED !== 'true') {
     console.log('Skipping seed: PRISMA_SEED is not set to "true"');
     return;
+  }
+
+  if (process.env.SEED_RESET === 'true') {
+    console.log('Resetting database...');
+    await prisma.songTag.deleteMany();
+    await prisma.song.deleteMany();
+    await prisma.tag.deleteMany();
+    await prisma.artist.deleteMany();
+    await prisma.user.deleteMany();
+    console.log('Database reset completed.');
   }
 
   console.log('Starting database seed...');
@@ -35,10 +72,12 @@ async function main() {
   }
 
   // Create sample artist and song
+  const ettaJamesSlug = generateArtistSlug('Etta James');
   const ettaJames = await prisma.artist.upsert({
-    where: { name: 'Etta James' },
+    where: { id: ettaJamesSlug },
     update: {},
     create: {
+      id: ettaJamesSlug,
       name: 'Etta James',
       genre: 'Blues',
       era: '1950s-2000s',
@@ -48,35 +87,104 @@ async function main() {
 
   console.log('Artist created/updated:', ettaJames.name);
 
-  // Create sample tags
-  const bluesTag = await prisma.tag.upsert({
-    where: { name: 'Blues' },
+  // Create Amy Winehouse
+  const amyWinehouseSlug = generateArtistSlug('Amy Winehouse');
+  const amyWinehouse = await prisma.artist.upsert({
+    where: { id: amyWinehouseSlug },
     update: {},
     create: {
+      id: amyWinehouseSlug,
+      name: 'Amy Winehouse',
+      genre: 'Soul',
+      era: '2000s-2010s',
+      description: 'British singer-songwriter known for her deep, expressive contralto vocals and her eclectic mix of soul, jazz, and R&B.',
+    },
+  });
+
+  console.log('Artist created/updated:', amyWinehouse.name);
+
+  // Create sample tags
+  const bluesSlug = generateTagSlug('Blues');
+  const bluesTag = await prisma.tag.upsert({
+    where: { id: bluesSlug },
+    update: {},
+    create: {
+      id: bluesSlug,
       name: 'Blues',
       category: 'genre',
       color: '#1E40AF',
     },
   });
 
+  const romanticSlug = generateTagSlug('Romantic');
   const romanticTag = await prisma.tag.upsert({
-    where: { name: 'Romantic' },
+    where: { id: romanticSlug },
     update: {},
     create: {
+      id: romanticSlug,
       name: 'Romantic',
       category: 'mood',
       color: '#EC4899',
     },
   });
 
-  console.log('Tags created/updated:', bluesTag.name, romanticTag.name);
-
-  // Create sample song
-  const atLast = await prisma.song.upsert({
-    where: { id: 'seed-at-last' }, // Using a fixed ID for idempotent seeding
+  const soulSlug = generateTagSlug('Soul');
+  const soulTag = await prisma.tag.upsert({
+    where: { id: soulSlug },
     update: {},
     create: {
-      id: 'seed-at-last',
+      id: soulSlug,
+      name: 'Soul',
+      category: 'genre',
+      color: '#7C3AED',
+    },
+  });
+
+  const jazzSlug = generateTagSlug('Jazz');
+  const jazzTag = await prisma.tag.upsert({
+    where: { id: jazzSlug },
+    update: {},
+    create: {
+      id: jazzSlug,
+      name: 'Jazz',
+      category: 'genre',
+      color: '#059669',
+    },
+  });
+
+  const retroSlug = generateTagSlug('Retro');
+  const retroTag = await prisma.tag.upsert({
+    where: { id: retroSlug },
+    update: {},
+    create: {
+      id: retroSlug,
+      name: 'Retro',
+      category: 'mood',
+      color: '#D97706',
+    },
+  });
+
+  const powerfulSlug = generateTagSlug('Powerful');
+  const powerfulTag = await prisma.tag.upsert({
+    where: { id: powerfulSlug },
+    update: {},
+    create: {
+      id: powerfulSlug,
+      name: 'Powerful',
+      category: 'mood',
+      color: '#DC2626',
+    },
+  });
+
+  console.log('Tags created/updated:', bluesTag.name, romanticTag.name, soulTag.name, jazzTag.name, retroTag.name, powerfulTag.name);
+
+  // Create sample song
+  const atLastSlug = generateSongSlug('Etta James', 'At Last');
+  const atLast = await prisma.song.upsert({
+    where: { id: atLastSlug },
+    update: {},
+    create: {
+      id: atLastSlug,
       title: 'At Last',
       artistId: ettaJames.id,
       originalKey: 'F',
@@ -93,6 +201,118 @@ async function main() {
   });
 
   console.log('Song created/updated:', atLast.title);
+
+  // Create Amy Winehouse songs
+  const valerie = await prisma.song.upsert({
+    where: { id: generateSongSlug('Amy Winehouse', 'Valerie') },
+    update: {},
+    create: {
+      id: generateSongSlug('Amy Winehouse', 'Valerie'),
+      title: 'Valerie',
+      artistId: amyWinehouse.id,
+      originalKey: 'C',
+      tempo: 124,
+      duration: 229,
+      notes: 'Upbeat soul cover, very popular for performances',
+      tags: {
+        create: [
+          { tagId: soulTag.id },
+          { tagId: retroTag.id },
+        ],
+      },
+    },
+  });
+
+  console.log('Song created/updated:', valerie.title);
+
+  const backToBlack = await prisma.song.upsert({
+    where: { id: generateSongSlug('Amy Winehouse', 'Back to Black') },
+    update: {},
+    create: {
+      id: generateSongSlug('Amy Winehouse', 'Back to Black'),
+      title: 'Back to Black',
+      artistId: amyWinehouse.id,
+      originalKey: 'Dm',
+      tempo: 98,
+      duration: 241,
+      notes: 'Signature song with soulful, melancholic feel',
+      tags: {
+        create: [
+          { tagId: soulTag.id },
+          { tagId: jazzTag.id },
+        ],
+      },
+    },
+  });
+
+  console.log('Song created/updated:', backToBlack.title);
+
+  const rehab = await prisma.song.upsert({
+    where: { id: generateSongSlug('Amy Winehouse', 'Rehab') },
+    update: {},
+    create: {
+      id: generateSongSlug('Amy Winehouse', 'Rehab'),
+      title: 'Rehab',
+      artistId: amyWinehouse.id,
+      originalKey: 'G',
+      tempo: 118,
+      duration: 213,
+      notes: 'Bold, powerful anthem with retro soul vibe',
+      tags: {
+        create: [
+          { tagId: soulTag.id },
+          { tagId: powerfulTag.id },
+          { tagId: retroTag.id },
+        ],
+      },
+    },
+  });
+
+  console.log('Song created/updated:', rehab.title);
+
+  const tears = await prisma.song.upsert({
+    where: { id: generateSongSlug('Amy Winehouse', 'Tears Dry on Their Own') },
+    update: {},
+    create: {
+      id: generateSongSlug('Amy Winehouse', 'Tears Dry on Their Own'),
+      title: 'Tears Dry on Their Own',
+      artistId: amyWinehouse.id,
+      originalKey: 'A',
+      tempo: 104,
+      duration: 183,
+      notes: 'Motown-influenced track with smooth groove',
+      tags: {
+        create: [
+          { tagId: soulTag.id },
+          { tagId: retroTag.id },
+        ],
+      },
+    },
+  });
+
+  console.log('Song created/updated:', tears.title);
+
+  const loveIsALosingGame = await prisma.song.upsert({
+    where: { id: generateSongSlug('Amy Winehouse', 'Love Is a Losing Game') },
+    update: {},
+    create: {
+      id: generateSongSlug('Amy Winehouse', 'Love Is a Losing Game'),
+      title: 'Love Is a Losing Game',
+      artistId: amyWinehouse.id,
+      originalKey: 'F',
+      tempo: 70,
+      duration: 155,
+      notes: 'Stripped down, emotional ballad with jazz influences',
+      tags: {
+        create: [
+          { tagId: jazzTag.id },
+          { tagId: romanticTag.id },
+        ],
+      },
+    },
+  });
+
+  console.log('Song created/updated:', loveIsALosingGame.title);
 
   console.log('Seed completed successfully!');
 }
