@@ -1,7 +1,7 @@
 {
-  "name": "Vocal Artist Portfolio",
-  "short_name": "Vocal Portfolio",
-  "description": "Showcase of vocal performance repertoire and past performances",
+  "name": "Music by Bree",
+  "short_name": "Music by Bree",
+  "description": "Showcase of Bree's repertoire and past performances",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
