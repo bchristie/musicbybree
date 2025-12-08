@@ -20,7 +20,19 @@ export default async function AdminDashboard() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Link
+          href="/admin/artists"
+          className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 hover:shadow-lg transition-shadow"
+        >
+          <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 mb-2">
+            Artists
+          </h2>
+          <p className="text-zinc-600 dark:text-zinc-400">
+            Manage artist profiles
+          </p>
+        </Link>
+
         <Link
           href="/admin/songs"
           className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 hover:shadow-lg transition-shadow"

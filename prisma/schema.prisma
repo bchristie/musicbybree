@@ -68,10 +68,24 @@ model VerificationToken {
 }
 
 // Core application models
+model Artist {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  genre       String?
+  era         String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  songs Song[]
+
+  @@index([name])
+}
+
 model Song {
   id          String   @id @default(cuid())
   title       String
-  artist      String
+  artistId    String
   originalKey String?
   tempo       Int?
   duration    Int? // Duration in seconds
@@ -79,11 +93,12 @@ model Song {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  artist       Artist              @relation(fields: [artistId], references: [id], onDelete: Cascade)
   tags         SongTag[]
   performances PerformanceSong[]
 
   @@index([title])
-  @@index([artist])
+  @@index([artistId])
 }
 
 model Tag {

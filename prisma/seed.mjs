@@ -33,34 +33,65 @@ async function main() {
     console.log('Skipping admin user creation: ADMIN_EMAIL and ADMIN_PASSWORD not provided');
   }
 
-  // Add your seed logic here
-  // Example: Create sample tags
-  // const jazzTag = await prisma.tag.upsert({
-  //   where: { name: 'Jazz' },
-  //   update: {},
-  //   create: {
-  //     name: 'Jazz',
-  //     category: 'genre',
-  //     color: '#3B82F6',
-  //   },
-  // });
+  // Create sample artist and song
+  const ettaJames = await prisma.artist.upsert({
+    where: { name: 'Etta James' },
+    update: {},
+    create: {
+      name: 'Etta James',
+      genre: 'Blues',
+      era: '1950s-2000s',
+      description: 'American singer known for her powerful voice and emotive performances in blues, R&B, soul, and jazz.',
+    },
+  });
 
-  // Example: Create sample songs
-  // const song = await prisma.song.upsert({
-  //   where: { title_artist: { title: 'My Funny Valentine', artist: 'Richard Rodgers' } },
-  //   update: {},
-  //   create: {
-  //     title: 'My Funny Valentine',
-  //     artist: 'Richard Rodgers',
-  //     key: 'Cm',
-  //     tempo: 'Ballad',
-  //     durationSeconds: 180,
-  //     notes: 'Classic jazz standard',
-  //     tags: {
-  //       connect: [{ id: jazzTag.id }],
-  //     },
-  //   },
-  // });
+  console.log('Artist created/updated:', ettaJames.name);
+
+  // Create sample tags
+  const bluesTag = await prisma.tag.upsert({
+    where: { name: 'Blues' },
+    update: {},
+    create: {
+      name: 'Blues',
+      category: 'genre',
+      color: '#1E40AF',
+    },
+  });
+
+  const romanticTag = await prisma.tag.upsert({
+    where: { name: 'Romantic' },
+    update: {},
+    create: {
+      name: 'Romantic',
+      category: 'mood',
+      color: '#EC4899',
+    },
+  });
+
+  console.log('Tags created/updated:', bluesTag.name, romanticTag.name);
+
+  // Create sample song
+  const atLast = await prisma.song.upsert({
+    where: { id: 'seed-at-last' }, // Using a fixed ID for idempotent seeding
+    update: {},
+    create: {
+      id: 'seed-at-last',
+      title: 'At Last',
+      artistId: ettaJames.id,
+      originalKey: 'F',
+      tempo: 60,
+      duration: 180,
+      notes: 'Classic blues ballad, perfect for romantic occasions',
+      tags: {
+        create: [
+          { tagId: bluesTag.id },
+          { tagId: romanticTag.id },
+        ],
+      },
+    },
+  });
+
+  console.log('Song created/updated:', atLast.title);
 
   console.log('Seed completed successfully!');
 }

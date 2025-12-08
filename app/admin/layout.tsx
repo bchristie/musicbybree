@@ -34,6 +34,12 @@ export default async function AdminLayout({
                 Dashboard
               </Link>
               <Link
+                href="/admin/artists"
+                className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors"
+              >
+                Artists
+              </Link>
+              <Link
                 href="/admin/songs"
                 className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 transition-colors"
               >
