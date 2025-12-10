@@ -1,12 +1,37 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import { AdminArtistList } from "@/components/AdminArtistList";
+import { artistRepo } from "@/lib/repo";
+import { Button } from "@/components/ui/button";
 
-export default async function AdminArtists() {
+async function getArtistsWithSongCount() {
+  const artists = await artistRepo.findAll();
+  
+  // Fetch song counts for each artist
+  const artistsWithCounts = await Promise.all(
+    artists.map(async (artist) => {
+      const withSongs = await artistRepo.findByIdWithSongs(artist.id);
+      return {
+        ...artist,
+        _count: {
+          songs: withSongs?.songs.length ?? 0,
+        },
+      };
+    })
+  );
+
+  return artistsWithCounts;
+}
+
+export default async function AdminArtistsPage() {
   const session = await auth();
   
   if (!session) {
     redirect("/admin/login");
   }
+
+  const artists = await getArtistsWithSongCount();
 
   return (
     <div className="space-y-8">
@@ -19,16 +44,21 @@ export default async function AdminArtists() {
             Manage artist profiles and information
           </p>
         </div>
-        <button className="px-4 py-2 bg-zinc-900 dark:bg-zinc-50 text-white dark:text-zinc-900 rounded-md hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors">
-          Add Artist
-        </button>
+        <Button>Add Artist</Button>
       </div>
 
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-8">
-        <p className="text-zinc-600 dark:text-zinc-400 text-center">
-          No artists yet. Click "Add Artist" to get started.
-        </p>
-      </div>
+      <Suspense
+        fallback={
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-8">
+            <p className="text-zinc-600 dark:text-zinc-400 text-center">
+              Loading artists...
+            </p>
+          </div>
+        }
+      >
+        <AdminArtistList initialArtists={artists} />
+      </Suspense>
     </div>
   );
 }
+
