@@ -1,14 +1,15 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { useArtistList } from "./ArtistListProvider";
 
 export function ArtistListMobile() {
+  const router = useRouter();
   const { filteredArtists } = useArtistList();
 
   const handleSelect = (artistId: string) => {
-    console.log("Artist selected:", artistId);
-    // TODO: Navigate to artist detail page or open modal
+    router.push(`/admin/artists/${artistId}`);
   };
 
   if (filteredArtists.length === 0) {

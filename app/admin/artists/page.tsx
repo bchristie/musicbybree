@@ -4,6 +4,8 @@ import { Suspense } from "react";
 import { AdminArtistList } from "@/components/AdminArtistList";
 import { artistRepo } from "@/lib/repo";
 import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import Link from "next/link";
 
 async function getArtistsWithSongCount() {
   return artistRepo.findAll({ includeSongCount: true });
@@ -29,7 +31,12 @@ export default async function AdminArtistsPage() {
             Manage artist profiles and information
           </p>
         </div>
-        <Button>Add Artist</Button>
+        <Link href="/admin/artists/new">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            New Artist
+          </Button>
+        </Link>
       </div>
 
       <Suspense
@@ -41,7 +48,7 @@ export default async function AdminArtistsPage() {
           </div>
         }
       >
-        <AdminArtistList initialArtists={artists} />
+        <AdminArtistList initialArtists={artists as any} />
       </Suspense>
     </div>
   );

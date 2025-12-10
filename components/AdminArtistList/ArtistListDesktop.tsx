@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -14,6 +15,7 @@ import { useArtistList } from "./ArtistListProvider";
 import type { ArtistFilters } from "./types";
 
 export function ArtistListDesktop() {
+  const router = useRouter();
   const { filteredArtists, filters, setSortBy, setSortOrder } = useArtistList();
 
   const handleSort = (sortBy: ArtistFilters["sortBy"]) => {
@@ -28,8 +30,7 @@ export function ArtistListDesktop() {
   };
 
   const handleSelect = (artistId: string) => {
-    console.log("Artist selected:", artistId);
-    // TODO: Navigate to artist detail page or open modal
+    router.push(`/admin/artists/${artistId}`);
   };
 
   const getSortIcon = (column: ArtistFilters["sortBy"]) => {
