@@ -79,7 +79,18 @@ export async function findSong(songTitle: string, artistHint?: string): Promise<
 }> {
   const systemPrompt = `You are a music database expert. When given a song title and optionally an artist, 
 return accurate information about the song in JSON format. If you're not certain about specific details, 
-omit them rather than guessing. For tempo, provide BPM as a number. For duration, provide seconds as a number.`;
+omit them rather than guessing. Use this exact structure:
+{
+  "title": "Song title",
+  "artist": "Artist name",
+  "originalKey": "Key signature (optional, e.g., 'C', 'Am', 'Bb')",
+  "tempo": 120,
+  "durationSeconds": 180,
+  "genre": "Primary genre (optional)",
+  "era": "Time period (optional)",
+  "mood": "Overall mood (optional)"
+}
+For tempo, provide BPM as a number. For duration, provide seconds as a number.`;
 
   const userPrompt = artistHint
     ? `Find information about the song "${songTitle}" by ${artistHint}`
@@ -99,7 +110,13 @@ export async function findArtist(artistName: string): Promise<{
   description?: string;
 }> {
   const systemPrompt = `You are a music historian. When given an artist name, return accurate information 
-about them in JSON format. Include their primary genre, the era they're associated with, and a brief description.`;
+about them in JSON format with the following structure:
+{
+  "name": "Artist name",
+  "genre": "Primary genre (optional)",
+  "era": "Time period/era (optional)",
+  "description": "Brief description (optional)"
+}`;
 
   const userPrompt = `Find information about the artist "${artistName}"`;
 
@@ -123,7 +140,14 @@ export async function enrichSongMetadata(song: {
   estimatedTempo?: number;
 }> {
   const systemPrompt = `You are a music cataloging expert. Given a song, suggest relevant metadata tags 
-including genres, moods, era, and if missing, estimate key signature and tempo. Return as JSON.`;
+including genres, moods, era, and if missing, estimate key signature and tempo. Return JSON with this structure:
+{
+  "suggestedGenres": ["genre1", "genre2"],
+  "suggestedMoods": ["mood1", "mood2"],
+  "suggestedEra": "Time period (optional)",
+  "keySignature": "Key (optional, only if not provided)",
+  "estimatedTempo": 120
+}`;
 
   const userPrompt = `Enrich metadata for: "${song.title}" by ${song.artist}
 Current key: ${song.originalKey || 'unknown'}
@@ -135,16 +159,50 @@ Current tempo: ${song.tempo || 'unknown'} BPM`;
 
 /**
  * Get song lyrics (with copyright awareness)
+ * Returns lyrics in a format compatible with the Prisma LyricLine model
  */
 export async function getSongLyrics(title: string, artist: string): Promise<{
   hasLyrics: boolean;
-  preview?: string;
-  fullLyrics?: string;
+  hasTiming: boolean;
+  lines: {
+    text: string;
+    time?: number; // Seconds from start (optional)
+    order: number; // Line number for display order
+  }[];
+  source: string;
   copyrightNotice?: string;
 }> {
   const systemPrompt = `You are a music lyrics assistant. You must respect copyright laws. 
-For copyrighted songs, only provide a small preview (first verse or chorus) and a copyright notice. 
-For public domain songs, you can provide full lyrics. Return as JSON.`;
+For copyrighted songs, only provide a small preview (first verse or chorus) and include a copyright notice. 
+For public domain songs, you can provide full lyrics.
+
+Return JSON with this exact structure:
+{
+  "hasLyrics": true,
+  "hasTiming": false,
+  "lines": [
+    {
+      "text": "First line of lyrics",
+      "time": 0.0,
+      "order": 1
+    },
+    {
+      "text": "Second line of lyrics",
+      "time": 3.5,
+      "order": 2
+    }
+  ],
+  "source": "openai-preview" or "openai-public-domain",
+  "copyrightNotice": "Copyright notice if applicable (optional)"
+}
+
+Each line should be a separate object in the "lines" array. The "order" field should start at 1 and increment for each line.
+
+IMPORTANT - Timing Information:
+- If you do NOT have accurate timing data, set "hasTiming" to false and omit the "time" field from each line
+- If you DO have accurate timing data, set "hasTiming" to true and include "time" as a number representing seconds from the start of the song (e.g., 0.0, 3.5, 12.75)
+- Time should be a floating point number in seconds, NOT a timestamp string
+- Most likely you will NOT have timing data, so set "hasTiming" to false`;
 
   const userPrompt = `Get lyrics for "${title}" by ${artist}`;
 
@@ -166,7 +224,16 @@ export async function getRecommendations(repertoire: {
 }[]> {
   const systemPrompt = `You are a music curator for a vocal performer. Based on their current repertoire, 
 suggest ${count} additional songs that would complement their collection. Consider genre variety, vocal range requirements, 
-audience appeal, and performance context. Return as JSON array.`;
+audience appeal, and performance context. Return JSON array with this structure:
+{
+  "recommendations": [
+    {
+      "title": "Song Title",
+      "artist": "Artist Name",
+      "reason": "Brief explanation of why this fits"
+    }
+  ]
+}`;
 
   const repertoireList = repertoire
     .map((song) => `"${song.title}" by ${song.artist}${song.genre ? ` (${song.genre})` : ''}`)
@@ -190,7 +257,17 @@ export async function parseSongInput(input: string): Promise<{
   notes?: string;
 }[]> {
   const systemPrompt = `You are a music catalog parser. Extract song information from natural language input. 
-Handle various formats like "Song Title by Artist in Key of X" or simple lists. Return as JSON array of songs.`;
+Handle various formats like "Song Title by Artist in Key of X" or simple lists. Return JSON with this structure:
+{
+  "songs": [
+    {
+      "title": "Song Title",
+      "artist": "Artist Name",
+      "key": "C (optional)",
+      "notes": "Any additional notes (optional)"
+    }
+  ]
+}`;
 
   const userPrompt = `Parse the following into structured song data:\n${input}`;
 
