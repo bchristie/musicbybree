@@ -10,30 +10,28 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import type { ArtistFilters } from "@/hooks/useAdminArtistFilters";
+import { useArtistList } from "./ArtistListProvider";
+import type { ArtistFilters } from "./types";
 
-export type ArtistWithSongCount = {
-  id: string;
-  name: string;
-  genre: string | null;
-  era: string | null;
-  description: string | null;
-  _count?: { songs: number };
-};
+export function ArtistListDesktop() {
+  const { filteredArtists, filters, setSortBy, setSortOrder } = useArtistList();
 
-interface ArtistListDesktopProps {
-  artists: ArtistWithSongCount[];
-  filters: ArtistFilters;
-  onSort: (sortBy: ArtistFilters["sortBy"]) => void;
-  onSelect: (artistId: string) => void;
-}
+  const handleSort = (sortBy: ArtistFilters["sortBy"]) => {
+    if (filters.sortBy === sortBy) {
+      // Toggle sort order
+      setSortOrder(filters.sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      // New sort column, default to ascending
+      setSortBy(sortBy);
+      setSortOrder("asc");
+    }
+  };
 
-export function ArtistListDesktop({
-  artists,
-  filters,
-  onSort,
-  onSelect,
-}: ArtistListDesktopProps) {
+  const handleSelect = (artistId: string) => {
+    console.log("Artist selected:", artistId);
+    // TODO: Navigate to artist detail page or open modal
+  };
+
   const getSortIcon = (column: ArtistFilters["sortBy"]) => {
     if (filters.sortBy !== column) {
       return <ArrowUpDown className="ml-2 h-4 w-4" />;
@@ -53,7 +51,7 @@ export function ArtistListDesktop({
             <TableHead className="w-[40%]">
               <Button
                 variant="ghost"
-                onClick={() => onSort("name")}
+                onClick={() => handleSort("name")}
                 className="-ml-4 h-8 data-[state=open]:bg-accent"
               >
                 Artist Name
@@ -63,7 +61,7 @@ export function ArtistListDesktop({
             <TableHead className="w-[20%]">
               <Button
                 variant="ghost"
-                onClick={() => onSort("genre")}
+                onClick={() => handleSort("genre")}
                 className="-ml-4 h-8 data-[state=open]:bg-accent"
               >
                 Genre
@@ -73,7 +71,7 @@ export function ArtistListDesktop({
             <TableHead className="w-[20%]">
               <Button
                 variant="ghost"
-                onClick={() => onSort("era")}
+                onClick={() => handleSort("era")}
                 className="-ml-4 h-8 data-[state=open]:bg-accent"
               >
                 Era
@@ -83,7 +81,7 @@ export function ArtistListDesktop({
             <TableHead className="w-[20%] text-right">
               <Button
                 variant="ghost"
-                onClick={() => onSort("songCount")}
+                onClick={() => handleSort("songCount")}
                 className="-ml-4 h-8 data-[state=open]:bg-accent"
               >
                 Songs
@@ -93,17 +91,17 @@ export function ArtistListDesktop({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {artists.length === 0 ? (
+          {filteredArtists.length === 0 ? (
             <TableRow>
               <TableCell colSpan={4} className="h-24 text-center text-zinc-500">
                 No artists found
               </TableCell>
             </TableRow>
           ) : (
-            artists.map((artist) => (
+            filteredArtists.map((artist) => (
               <TableRow
                 key={artist.id}
-                onClick={() => onSelect(artist.id)}
+                onClick={() => handleSelect(artist.id)}
                 className="cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900/50"
               >
                 <TableCell className="font-medium">{artist.name}</TableCell>
@@ -127,7 +125,7 @@ export function ArtistListDesktop({
                 </TableCell>
                 <TableCell className="text-right">
                   <span className="inline-flex items-center justify-center min-w-[3rem] px-2 py-1 text-xs font-medium bg-zinc-100 text-zinc-700 rounded dark:bg-zinc-800 dark:text-zinc-300">
-                    {artist._count?.songs ?? 0} song{artist._count?.songs !== 1 ? 's' : ''}
+                    {artist._count.songs} song{artist._count.songs !== 1 ? 's' : ''}
                   </span>
                 </TableCell>
               </TableRow>

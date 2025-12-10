@@ -23,9 +23,22 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search");
     const artistId = searchParams.get("artistId");
     const tagId = searchParams.get("tagId");
+    const include = searchParams.get("include");
+
+    // Parse include options
+    const includeArtist = !include || include.includes("artist");
+    const includeTags = !include || include.includes("tags");
+    const includePerformanceCount = include?.includes("performanceCount");
+
+    // If filtering by tagId, we must include tags for the filter to work
+    const mustIncludeTags = includeTags || !!tagId;
 
     // Fetch songs with full relations
-    const songs = await songRepo.findForRepertoire();
+    const songs = await songRepo.findAll({
+      includeArtist,
+      includeTags: mustIncludeTags,
+      includePerformanceCount,
+    });
 
     // Apply filters
     let filtered = songs;
@@ -34,7 +47,7 @@ export async function GET(request: NextRequest) {
       const searchLower = search.toLowerCase();
       filtered = filtered.filter(song =>
         song.title.toLowerCase().includes(searchLower) ||
-        song.artist.name.toLowerCase().includes(searchLower)
+        (song.artist && song.artist.name.toLowerCase().includes(searchLower))
       );
     }
 
@@ -42,10 +55,20 @@ export async function GET(request: NextRequest) {
       filtered = filtered.filter(song => song.artistId === artistId);
     }
 
-    if (tagId) {
-      filtered = filtered.filter(song =>
-        song.tags.some(t => t.tag.id === tagId)
-      );
+    if (tagId && mustIncludeTags) {
+      filtered = filtered.filter(song => {
+        if (!song.tags) return false;
+        // Type assertion: when mustIncludeTags=true, tags include nested tag object
+        return song.tags.some((t: any) => t.tag?.id === tagId);
+      });
+    }
+
+    // Remove tags from response if not requested (but we needed them for filtering)
+    if (!includeTags && mustIncludeTags) {
+      filtered = filtered.map(song => {
+        const { tags, ...rest } = song;
+        return rest as typeof song;
+      });
     }
 
     return NextResponse.json({

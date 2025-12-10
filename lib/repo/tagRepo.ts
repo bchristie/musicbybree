@@ -10,11 +10,18 @@ import type { Tag, Prisma } from "@prisma/client";
 
 export const tagRepo = {
   /**
-   * Find all tags
+   * Find all tags with optional includes
    */
-  async findAll(): Promise<Tag[]> {
+  async findAll(options?: {
+    includeSongCount?: boolean;
+  }) {
     return prisma.tag.findMany({
       orderBy: [{ category: "asc" }, { name: "asc" }],
+      include: options?.includeSongCount ? {
+        _count: {
+          select: { songs: true }
+        }
+      } : undefined,
     });
   },
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDown, X } from "lucide-react";
+import { useMemo } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -16,23 +17,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { ArtistFilters } from "@/hooks/useAdminArtistFilters";
+import { useArtistList } from "./ArtistListProvider";
 
-interface FilterAccordionProps {
-  filters: ArtistFilters;
-  onFilterChange: (updates: Partial<ArtistFilters>) => void;
-  onClearFilters: () => void;
-  availableGenres: string[];
-  availableEras: string[];
-}
+export function FilterAccordion() {
+  const { artists, filters, setGenre, setEra, setHasSongs, clearFilters } = useArtistList();
 
-export function FilterAccordion({
-  filters,
-  onFilterChange,
-  onClearFilters,
-  availableGenres,
-  availableEras,
-}: FilterAccordionProps) {
+  // Extract unique genres and eras from all artists
+  const { availableGenres, availableEras } = useMemo(() => {
+    const genres = new Set<string>();
+    const eras = new Set<string>();
+
+    artists.forEach((artist) => {
+      if (artist.genre) genres.add(artist.genre);
+      if (artist.era) eras.add(artist.era);
+    });
+
+    return {
+      availableGenres: Array.from(genres).sort(),
+      availableEras: Array.from(eras).sort(),
+    };
+  }, [artists]);
+
   const hasActiveFilters =
     filters.genre || filters.era || filters.hasSongs !== "all";
 
@@ -56,7 +61,7 @@ export function FilterAccordion({
               size="sm"
               onClick={(e) => {
                 e.stopPropagation();
-                onClearFilters();
+                clearFilters();
               }}
               className="text-xs h-8"
             >
@@ -74,9 +79,7 @@ export function FilterAccordion({
               </Label>
               <Select
                 value={filters.genre || "all"}
-                onValueChange={(value) =>
-                  onFilterChange({ genre: value === "all" ? "" : value })
-                }
+                onValueChange={(value) => setGenre(value === "all" ? "" : value)}
               >
                 <SelectTrigger id="genre-filter" className="w-full">
                   <SelectValue placeholder="All genres" />
@@ -99,9 +102,7 @@ export function FilterAccordion({
               </Label>
               <Select
                 value={filters.era || "all"}
-                onValueChange={(value) =>
-                  onFilterChange({ era: value === "all" ? "" : value })
-                }
+                onValueChange={(value) => setEra(value === "all" ? "" : value)}
               >
                 <SelectTrigger id="era-filter" className="w-full">
                   <SelectValue placeholder="All eras" />
@@ -124,7 +125,7 @@ export function FilterAccordion({
               </Label>
               <Select
                 value={filters.hasSongs}
-                onValueChange={(value) => onFilterChange({ hasSongs: value })}
+                onValueChange={setHasSongs}
               >
                 <SelectTrigger id="songs-filter" className="w-full">
                   <SelectValue />

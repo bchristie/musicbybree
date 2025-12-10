@@ -10,11 +10,18 @@ import type { Artist, Prisma } from "@prisma/client";
 
 export const artistRepo = {
   /**
-   * Find all artists
+   * Find all artists with optional includes
    */
-  async findAll(): Promise<Artist[]> {
+  async findAll(options?: {
+    includeSongCount?: boolean;
+  }) {
     return prisma.artist.findMany({
       orderBy: { name: "asc" },
+      include: options?.includeSongCount ? {
+        _count: {
+          select: { songs: true }
+        }
+      } : undefined,
     });
   },
 

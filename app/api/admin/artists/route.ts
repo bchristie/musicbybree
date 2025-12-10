@@ -22,9 +22,12 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const search = searchParams.get("search");
     const genre = searchParams.get("genre");
+    const includeSongCount = searchParams.get("include")?.includes("songCount");
 
-    // Fetch artists (you can extend this with filtering)
-    const artists = await artistRepo.findAll();
+    // Fetch artists with optional song count
+    const artists = await artistRepo.findAll({ 
+      includeSongCount: includeSongCount 
+    });
 
     // Optional: Apply filters
     let filtered = artists;

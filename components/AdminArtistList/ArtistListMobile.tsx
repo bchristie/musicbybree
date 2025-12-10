@@ -1,15 +1,17 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
-import type { ArtistWithSongCount } from "./ArtistListDesktop";
+import { useArtistList } from "./ArtistListProvider";
 
-interface ArtistListMobileProps {
-  artists: ArtistWithSongCount[];
-  onSelect: (artistId: string) => void;
-}
+export function ArtistListMobile() {
+  const { filteredArtists } = useArtistList();
 
-export function ArtistListMobile({ artists, onSelect }: ArtistListMobileProps) {
-  if (artists.length === 0) {
+  const handleSelect = (artistId: string) => {
+    console.log("Artist selected:", artistId);
+    // TODO: Navigate to artist detail page or open modal
+  };
+
+  if (filteredArtists.length === 0) {
     return (
       <div className="flex items-center justify-center py-12">
         <p className="text-zinc-500 text-sm">No artists found</p>
@@ -19,10 +21,10 @@ export function ArtistListMobile({ artists, onSelect }: ArtistListMobileProps) {
 
   return (
     <div className="space-y-3">
-      {artists.map((artist) => (
+      {filteredArtists.map((artist) => (
         <Card
           key={artist.id}
-          onClick={() => onSelect(artist.id)}
+          onClick={() => handleSelect(artist.id)}
           className="p-4 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900/50 transition-colors"
         >
           <div className="flex items-start justify-between gap-3">
@@ -45,7 +47,7 @@ export function ArtistListMobile({ artists, onSelect }: ArtistListMobileProps) {
             </div>
             <div className="flex-shrink-0">
               <span className="inline-flex items-center justify-center min-w-[3rem] px-2 py-1 text-xs font-medium bg-zinc-100 text-zinc-700 rounded dark:bg-zinc-800 dark:text-zinc-300">
-                {artist._count?.songs ?? 0}
+                {artist._count.songs}
               </span>
             </div>
           </div>

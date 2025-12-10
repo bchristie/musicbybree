@@ -21,9 +21,10 @@ export async function GET(request: NextRequest) {
     // Get query parameters
     const searchParams = request.nextUrl.searchParams;
     const category = searchParams.get("category");
+    const includeSongCount = searchParams.get("include")?.includes("songCount");
 
     // Fetch tags
-    const tags = await tagRepo.findAll();
+    const tags = await tagRepo.findAll({ includeSongCount });
 
     // Optional: Filter by category
     let filtered = tags;

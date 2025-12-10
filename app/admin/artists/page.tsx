@@ -6,22 +6,7 @@ import { artistRepo } from "@/lib/repo";
 import { Button } from "@/components/ui/button";
 
 async function getArtistsWithSongCount() {
-  const artists = await artistRepo.findAll();
-  
-  // Fetch song counts for each artist
-  const artistsWithCounts = await Promise.all(
-    artists.map(async (artist) => {
-      const withSongs = await artistRepo.findByIdWithSongs(artist.id);
-      return {
-        ...artist,
-        _count: {
-          songs: withSongs?.songs.length ?? 0,
-        },
-      };
-    })
-  );
-
-  return artistsWithCounts;
+  return artistRepo.findAll({ includeSongCount: true });
 }
 
 export default async function AdminArtistsPage() {
