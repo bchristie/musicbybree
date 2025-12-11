@@ -1,7 +1,8 @@
-import type { Song, Artist, Tag } from "@prisma/client";
+import type { Song, Artist, Tag, RepertoireEntry } from "@prisma/client";
 
 export type SongWithRelations = Song & {
   artist: Artist;
+  repertoireEntry: Pick<RepertoireEntry, 'status' | 'performedKey' | 'performedTempo' | 'typicalDuration'> | null;
   tags: Array<{
     tag: Tag;
   }>;

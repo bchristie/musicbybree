@@ -28,4 +28,7 @@ export type ArtistSong = {
   originalKey: string | null;
   tempo: number | null;
   duration: number | null;
+  repertoireEntry: {
+    status: string;
+  } | null;
 };

@@ -68,6 +68,15 @@ model VerificationToken {
 }
 
 // Core application models
+
+// Repertoire status enum
+enum RepertoireStatus {
+  LEARNING   // Currently practicing, not performance-ready
+  READY      // Confident and performance-ready
+  FEATURED   // Go-to songs, highest confidence
+  ARCHIVED   // Previously performed but not actively maintained
+}
+
 model Artist {
   id          String   @id // Slug format: artist-name
   name        String   @unique
@@ -93,13 +102,53 @@ model Song {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  artist       Artist              @relation(fields: [artistId], references: [id], onDelete: Cascade)
-  tags         SongTag[]
-  performances PerformanceSong[]
-  lyric        Lyric?
+  artist          Artist              @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  repertoireEntry RepertoireEntry?
+  tags            SongTag[]
+  performances    PerformanceSong[]
+  lyric           Lyric?
 
   @@index([title])
   @@index([artistId])
+}
+
+model RepertoireEntry {
+  id              String           @id @default(cuid())
+  songId          String           @unique // One-to-one: a song can have at most one active repertoire entry
+  status          RepertoireStatus @default(LEARNING)
+
+  // Performance metadata (YOUR version of the song)
+  performedKey    String? // Key you actually perform it in (if different from original)
+  performedTempo  Int? // Tempo you perform at (if different from original)
+  capoPosition    Int? // Guitar capo position
+
+  // Tracking
+  addedAt         DateTime @default(now())
+  lastPracticed   DateTime?
+  lastPerformed   DateTime?
+  practiceCount   Int      @default(0)
+  performanceCount Int     @default(0)
+
+  // Notes and customization
+  notes       String? // "Capo 3, drop D tuning, fingerpicking intro"
+  arrangement String? // "Verse-Chorus-Bridge-Chorus x2"
+
+  // Setlist planning helpers
+  difficulty         Int?     @default(3) // 1-5 scale
+  vocallyDemanding   Boolean  @default(false) // Helps balance setlist
+  energyLevel        Int?     @default(3) // 1-5: ballad to uptempo
+  typicalDuration    Int? // Your typical performance time in seconds (may differ from recording)
+  worksWellFor       String? // "weddings, corporate, jazz clubs"
+  avoidAfter         String? // "Don't follow with another ballad"
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  song Song @relation(fields: [songId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([lastPerformed])
+  @@index([lastPracticed])
 }
 
 model Tag {
@@ -124,17 +173,22 @@ model SongTag {
 }
 
 model Performance {
-  id          String   @id @default(cuid())
-  venue       String
-  date        DateTime
-  description String?
-  notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                String   @id @default(cuid())
+  venue             String
+  date              DateTime
+  description       String?
+  notes             String?
+  type              String? // "wedding", "corporate", "club gig", "private party"
+  expectedDuration  Int? // Expected duration in minutes
+  completed         Boolean  @default(false) // Mark as completed after the gig
+  setlistNotes      String? // "Flow was great, crowd loved song 3"
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   songs PerformanceSong[]
 
   @@index([date])
+  @@index([completed])
 }
 
 model PerformanceSong {

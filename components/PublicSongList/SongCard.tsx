@@ -18,19 +18,27 @@ export function SongCard({ song }: SongCardProps) {
   const tagsToShow = [...visibleTags, ...remainingTags.slice(0, Math.max(0, 3 - visibleTags.length))];
   const hiddenCount = song.tags.length - tagsToShow.length;
 
+  const isFeatured = song.repertoireEntry?.status === 'FEATURED';
+  const displayKey = song.repertoireEntry?.performedKey || song.originalKey;
+  const displayTempo = song.repertoireEntry?.performedTempo || song.tempo;
+
   return (
-    <div className="group relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4 hover:shadow-lg transition-shadow">
+    <div className={`group relative bg-white dark:bg-zinc-900 rounded-lg p-4 hover:shadow-lg transition-all ${
+      isFeatured 
+        ? 'border-2 border-amber-500/50 dark:border-amber-500/40' 
+        : 'border border-zinc-200 dark:border-zinc-800'
+    }`}>
       {/* Key and Tempo badges in top right corner */}
       <div className="absolute top-3 right-3 flex gap-1">
-        {song.originalKey && (
+        {displayKey && (
           <span className="px-2 py-0.5 text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded">
-            {song.originalKey}
+            {displayKey}
           </span>
         )}
-        {song.tempo && (
+        {displayTempo && (
           <span className="px-2 py-0.5 text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded flex items-center gap-0.5">
             <Music className="w-3 h-3" />
-            {song.tempo}
+            {displayTempo}
           </span>
         )}
       </div>

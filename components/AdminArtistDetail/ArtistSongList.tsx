@@ -64,9 +64,37 @@ export function ArtistSongList({ songs, artistName }: ArtistSongListProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {songs.map((song) => (
-                <TableRow key={song.id} className="cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
-                  <TableCell className="font-medium">{song.title}</TableCell>
+              {songs.map((song) => {
+                const status = song.repertoireEntry?.status;
+                const getStatusBadge = () => {
+                  if (!status) return null;
+                  
+                  const badges = {
+                    FEATURED: { label: 'Featured', color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400' },
+                    READY: { label: 'Ready', color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' },
+                    LEARNING: { label: 'Learning', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' },
+                    ARCHIVED: { label: 'Archived', color: 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-400' },
+                  };
+                  
+                  const badge = badges[status as keyof typeof badges];
+                  if (!badge) return null;
+                  
+                  return (
+                    <span className={`ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${badge.color}`}>
+                      {badge.label}
+                    </span>
+                  );
+                };
+                
+                return (
+                <TableRow 
+                  key={song.id} 
+                  className="cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900/50"
+                >
+                  <TableCell className="font-medium">
+                    {song.title}
+                    {getStatusBadge()}
+                  </TableCell>
                   <TableCell>
                     {song.originalKey ? (
                       <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
@@ -87,19 +115,45 @@ export function ArtistSongList({ songs, artistName }: ArtistSongListProps) {
                     {formatDuration(song.duration)}
                   </TableCell>
                 </TableRow>
-              ))}
+              );
+              })}
             </TableBody>
           </Table>
         </div>
 
         {/* Mobile view */}
         <div className="md:hidden space-y-3">
-          {songs.map((song) => (
+          {songs.map((song) => {
+            const status = song.repertoireEntry?.status;
+            const getStatusBadge = () => {
+              if (!status) return null;
+              
+              const badges = {
+                FEATURED: { label: 'Featured', color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400' },
+                READY: { label: 'Ready', color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' },
+                LEARNING: { label: 'Learning', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' },
+                ARCHIVED: { label: 'Archived', color: 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-400' },
+              };
+              
+              const badge = badges[status as keyof typeof badges];
+              if (!badge) return null;
+              
+              return (
+                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${badge.color}`}>
+                  {badge.label}
+                </span>
+              );
+            };
+            
+            return (
             <div
               key={song.id}
               className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 cursor-pointer"
             >
-              <h4 className="font-medium text-sm mb-2">{song.title}</h4>
+              <div className="flex items-center gap-2 mb-2">
+                <h4 className="font-medium text-sm">{song.title}</h4>
+                {getStatusBadge()}
+              </div>
               <div className="flex items-center gap-3 text-xs text-zinc-600 dark:text-zinc-400">
                 {song.originalKey && (
                   <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
@@ -110,7 +164,8 @@ export function ArtistSongList({ songs, artistName }: ArtistSongListProps) {
                 {song.duration && <span>{formatDuration(song.duration)}</span>}
               </div>
             </div>
-          ))}
+          );
+          })}
         </div>
       </CardContent>
     </Card>

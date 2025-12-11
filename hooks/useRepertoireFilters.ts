@@ -10,6 +10,7 @@ export interface RepertoireFilters {
   tags: string[];
   keys: string[];
   artists: string[];
+  statuses: string[];
   tempoMin: number | null;
   tempoMax: number | null;
   sort: SortOption;
@@ -28,6 +29,7 @@ export function useRepertoireFilters() {
       tags: searchParams.get("tags")?.split(",").filter(Boolean) || [],
       keys: searchParams.get("keys")?.split(",").filter(Boolean) || [],
       artists: searchParams.get("artists")?.split(",").filter(Boolean) || [],
+      statuses: searchParams.get("statuses")?.split(",").filter(Boolean) || [],
       tempoMin: searchParams.get("tempoMin") ? parseInt(searchParams.get("tempoMin")!) : null,
       tempoMax: searchParams.get("tempoMax") ? parseInt(searchParams.get("tempoMax")!) : null,
       sort: (searchParams.get("sort") as SortOption) || "artist",
@@ -45,6 +47,7 @@ export function useRepertoireFilters() {
         tags: searchParams.get("tags")?.split(",").filter(Boolean) || [],
         keys: searchParams.get("keys")?.split(",").filter(Boolean) || [],
         artists: searchParams.get("artists")?.split(",").filter(Boolean) || [],
+        statuses: searchParams.get("statuses")?.split(",").filter(Boolean) || [],
         tempoMin: searchParams.get("tempoMin") ? parseInt(searchParams.get("tempoMin")!) : null,
         tempoMax: searchParams.get("tempoMax") ? parseInt(searchParams.get("tempoMax")!) : null,
         sort: (searchParams.get("sort") as SortOption) || "artist",
@@ -76,6 +79,12 @@ export function useRepertoireFilters() {
         params.set("artists", newFilters.artists.join(","));
       } else {
         params.delete("artists");
+      }
+
+      if (newFilters.statuses.length > 0) {
+        params.set("statuses", newFilters.statuses.join(","));
+      } else {
+        params.delete("statuses");
       }
 
       if (newFilters.tempoMin !== null) {
@@ -142,6 +151,16 @@ export function useRepertoireFilters() {
     [filters.artists, updateFilters]
   );
 
+  const toggleStatus = useCallback(
+    (status: string) => {
+      const statuses = filters.statuses.includes(status)
+        ? filters.statuses.filter((s) => s !== status)
+        : [...filters.statuses, status];
+      updateFilters({ statuses });
+    },
+    [filters.statuses, updateFilters]
+  );
+
   const setTempoRange = useCallback(
     (min: number | null, max: number | null) => {
       updateFilters({ tempoMin: min, tempoMax: max });
@@ -162,6 +181,7 @@ export function useRepertoireFilters() {
       tags: [],
       keys: [],
       artists: [],
+      statuses: [],
       tempoMin: null,
       tempoMax: null,
       sort: "artist",
@@ -174,6 +194,7 @@ export function useRepertoireFilters() {
       filters.tags.length +
       filters.keys.length +
       filters.artists.length +
+      filters.statuses.length +
       (filters.tempoMin !== null || filters.tempoMax !== null ? 1 : 0)
     );
   }, [filters]);
@@ -186,6 +207,7 @@ export function useRepertoireFilters() {
     toggleTag,
     toggleKey,
     toggleArtist,
+    toggleStatus,
     setTempoRange,
     setSort,
     clearFilters,

@@ -16,10 +16,12 @@ export const songRepo = {
     includeArtist?: boolean;
     includeTags?: boolean;
     includePerformanceCount?: boolean;
+    includeRepertoireEntry?: boolean;
   }) {
     const includeArtist = options?.includeArtist ?? true;
     const includeTags = options?.includeTags ?? true;
     const includePerformanceCount = options?.includePerformanceCount ?? false;
+    const includeRepertoireEntry = options?.includeRepertoireEntry ?? false;
 
     return prisma.song.findMany({
       include: {
@@ -27,6 +29,11 @@ export const songRepo = {
         tags: includeTags ? {
           include: {
             tag: true,
+          },
+        } : undefined,
+        repertoireEntry: includeRepertoireEntry ? {
+          select: {
+            status: true,
           },
         } : undefined,
         _count: includePerformanceCount ? {
@@ -277,10 +284,29 @@ export const songRepo = {
   /**
    * Get songs for repertoire display
    */
+  /**
+   * Find songs for public repertoire page
+   * Only returns performance-ready songs (READY or FEATURED status)
+   */
   async findForRepertoire() {
     return prisma.song.findMany({
+      where: {
+        repertoireEntry: {
+          status: {
+            in: ["READY", "FEATURED"],
+          },
+        },
+      },
       include: {
         artist: true,
+        repertoireEntry: {
+          select: {
+            status: true,
+            performedKey: true,
+            performedTempo: true,
+            typicalDuration: true,
+          },
+        },
         tags: {
           include: {
             tag: true,

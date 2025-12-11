@@ -44,6 +44,12 @@ export function PublicSongList({ songs }: PublicSongListProps) {
         if (!filters.artists.includes(song.artistId)) return false;
       }
 
+      // Status filter
+      if (filters.statuses.length > 0) {
+        const status = song.repertoireEntry?.status;
+        if (!status || !filters.statuses.includes(status)) return false;
+      }
+
       // Tempo filter
       if (song.tempo) {
         if (filters.tempoMin !== null && song.tempo < filters.tempoMin) return false;
