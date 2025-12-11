@@ -1,6 +1,8 @@
 "use client";
 
-import { Music2 } from "lucide-react";
+import Link from "next/link";
+import { Music2, Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -15,9 +17,10 @@ import type { ArtistSong } from "./types";
 interface ArtistSongListProps {
   songs: ArtistSong[];
   artistName: string;
+  artistId: string;
 }
 
-export function ArtistSongList({ songs, artistName }: ArtistSongListProps) {
+export function ArtistSongList({ songs, artistName, artistId }: ArtistSongListProps) {
   const formatDuration = (seconds: number | null): string => {
     if (!seconds) return "—";
     const mins = Math.floor(seconds / 60);
@@ -29,8 +32,18 @@ export function ArtistSongList({ songs, artistName }: ArtistSongListProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Songs</CardTitle>
-          <CardDescription>Songs in your repertoire by {artistName}</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Songs</CardTitle>
+              <CardDescription>Songs in your repertoire by {artistName}</CardDescription>
+            </div>
+            <Button asChild size="sm">
+              <Link href={`/admin/artists/${artistId}/songs/new`}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Song
+              </Link>
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -48,8 +61,18 @@ export function ArtistSongList({ songs, artistName }: ArtistSongListProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Songs ({songs.length})</CardTitle>
-        <CardDescription>Songs in your repertoire by {artistName}</CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Songs ({songs.length})</CardTitle>
+            <CardDescription>Songs in your repertoire by {artistName}</CardDescription>
+          </div>
+          <Button asChild size="sm">
+            <Link href={`/admin/artists/${artistId}/songs/new`}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Song
+            </Link>
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
         {/* Desktop view */}
@@ -92,7 +115,12 @@ export function ArtistSongList({ songs, artistName }: ArtistSongListProps) {
                   className="cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900/50"
                 >
                   <TableCell className="font-medium">
-                    {song.title}
+                    <Link 
+                      href={`/admin/artists/${artistId}/songs/${song.id}`}
+                      className="hover:underline"
+                    >
+                      {song.title}
+                    </Link>
                     {getStatusBadge()}
                   </TableCell>
                   <TableCell>
@@ -146,9 +174,10 @@ export function ArtistSongList({ songs, artistName }: ArtistSongListProps) {
             };
             
             return (
-            <div
+            <Link
               key={song.id}
-              className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 cursor-pointer"
+              href={`/admin/artists/${artistId}/songs/${song.id}`}
+              className="block p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-900/50 cursor-pointer"
             >
               <div className="flex items-center gap-2 mb-2">
                 <h4 className="font-medium text-sm">{song.title}</h4>
@@ -163,7 +192,7 @@ export function ArtistSongList({ songs, artistName }: ArtistSongListProps) {
                 {song.tempo && <span>{song.tempo} BPM</span>}
                 {song.duration && <span>{formatDuration(song.duration)}</span>}
               </div>
-            </div>
+            </Link>
           );
           })}
         </div>
