@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Music2, Plus, Sparkles } from "lucide-react";
+import { Music2, Plus, Sparkles, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -280,9 +280,10 @@ export function ArtistSongList({ songs, artistName, artistId }: ArtistSongListPr
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[50%]">Title</TableHead>
+                <TableHead className="w-[45%]">Title</TableHead>
+                <TableHead className="w-[10%]">Lyrics</TableHead>
                 <TableHead className="w-[15%]">Key</TableHead>
-                <TableHead className="w-[20%]">Tempo</TableHead>
+                <TableHead className="w-[15%]">Tempo</TableHead>
                 <TableHead className="w-[15%] text-right">Duration</TableHead>
               </TableRow>
             </TableHeader>
@@ -318,6 +319,13 @@ export function ArtistSongList({ songs, artistName, artistId }: ArtistSongListPr
                   <TableCell className="font-medium">
                     {song.title}
                     {getStatusBadge()}
+                  </TableCell>
+                  <TableCell>
+                    {song.hasLyrics ? (
+                      <FileText className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    ) : (
+                      <FileText className="h-4 w-4 text-zinc-300 dark:text-zinc-600" />
+                    )}
                   </TableCell>
                   <TableCell>
                     {song.originalKey ? (
@@ -377,6 +385,9 @@ export function ArtistSongList({ songs, artistName, artistId }: ArtistSongListPr
             >
               <div className="flex items-center gap-2 mb-2">
                 <h4 className="font-medium text-sm">{song.title}</h4>
+                {song.hasLyrics && (
+                  <FileText className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                )}
                 {getStatusBadge()}
               </div>
               <div className="flex items-center gap-3 text-xs text-zinc-600 dark:text-zinc-400">

@@ -17,11 +17,13 @@ export const songRepo = {
     includeTags?: boolean;
     includePerformanceCount?: boolean;
     includeRepertoireEntry?: boolean;
+    includeLyrics?: boolean;
   }) {
     const includeArtist = options?.includeArtist ?? true;
     const includeTags = options?.includeTags ?? true;
     const includePerformanceCount = options?.includePerformanceCount ?? false;
     const includeRepertoireEntry = options?.includeRepertoireEntry ?? false;
+    const includeLyrics = options?.includeLyrics ?? false;
 
     return prisma.song.findMany({
       include: {
@@ -34,6 +36,11 @@ export const songRepo = {
         repertoireEntry: includeRepertoireEntry ? {
           select: {
             status: true,
+          },
+        } : undefined,
+        lyric: includeLyrics ? {
+          select: {
+            id: true,
           },
         } : undefined,
         _count: includePerformanceCount ? {

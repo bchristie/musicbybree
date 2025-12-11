@@ -20,12 +20,13 @@ export default async function ArtistDetailPage({ params }: ArtistDetailPageProps
     notFound();
   }
 
-  // Fetch songs by this artist with repertoire status
+  // Fetch songs by this artist with repertoire status and lyrics
   const allSongs = await songRepo.findAll({
     includeArtist: false,
     includeTags: false,
     includePerformanceCount: false,
     includeRepertoireEntry: true,
+    includeLyrics: true,
   });
   
   const artistSongs = allSongs
@@ -36,6 +37,7 @@ export default async function ArtistDetailPage({ params }: ArtistDetailPageProps
       originalKey: song.originalKey,
       tempo: song.tempo,
       duration: song.duration,
+      hasLyrics: !!song.lyric,
       repertoireEntry: song.repertoireEntry ? {
         status: song.repertoireEntry.status,
       } : null,
