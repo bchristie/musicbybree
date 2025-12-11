@@ -60,10 +60,12 @@ export abstract class LyricsProvider {
 
   /**
    * Clean a string for URL usage (can be overridden by providers)
+   * Removes "The" prefix and non-alphanumeric characters
    */
   protected cleanForUrl(input: string): string {
     return input
       .toLowerCase()
+      .replace(/^the\s+/i, '')  // Remove "The " prefix
       .replace(/[^a-z0-9]/gi, '');
   }
 
