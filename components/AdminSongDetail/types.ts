@@ -37,20 +37,25 @@ export type SongDetailData = {
     }>;
   } | null;
   repertoireEntry?: {
+    id: string;
+    songId: string;
     status: string;
     performedKey: string | null;
     performedTempo: number | null;
+    capoPosition: number | null;
     typicalDuration: number | null;
-    notes: string | null;
-    arrangement: string | null;
     difficulty: number | null;
-    vocallyDemanding: boolean | null;
+    vocallyDemanding: boolean;
     energyLevel: number | null;
     worksWellFor: string | null;
     avoidAfter: string | null;
+    notes: string | null;
+    arrangement: string | null;
+    addedAt: Date;
     lastPracticed: Date | null;
-    practiceCount: number | null;
-    performanceCount: number | null;
+    lastPerformed: Date | null;
+    practiceCount: number;
+    performanceCount: number;
   } | null;
 };
 

@@ -78,6 +78,7 @@ export const songRepo = {
             },
           },
         },
+        repertoireEntry: true,
       },
     });
   },
