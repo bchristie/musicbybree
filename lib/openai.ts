@@ -10,6 +10,39 @@ const DEFAULT_MODEL = 'gpt-4o-mini';
 const DEFAULT_TEMPERATURE = 0.7;
 
 /**
+ * Normalize key signature to use proper music symbols
+ * Converts b to ♭ and # to ♯ for consistent formatting
+ * Normalizes major/minor terminology
+ */
+function normalizeKeySignature(key: string | undefined | null): string | undefined {
+  if (!key) return undefined;
+  
+  let normalized = key;
+  
+  // Replace 'b' with ♭ and '#' with ♯
+  // Handle common formats like "Ab", "A♭", "C#", "C♯", "Bbm", "B♭m"
+  normalized = normalized
+    .replace(/([A-G])b/g, '$1♭')  // Ab → A♭
+    .replace(/([A-G])#/g, '$1♯'); // C# → C♯
+  
+  // Normalize major/minor terminology
+  // First handle variations before the space (if any)
+  normalized = normalized
+    .replace(/\s+Mjor/gi, ' Major')    // " Mjor" → " Major"
+    .replace(/\s+major/g, ' Major')    // " major" → " Major"
+    .replace(/\s+M$/g, ' Major')       // " M" → " Major"
+    .replace(/\s+minor/g, ' Minor')    // " minor" → " Minor"
+    .replace(/\s+m$/g, ' Minor');      // " m" → " Minor"
+  
+  // Handle cases with no space (e.g., "Cm" → "C Minor")
+  normalized = normalized
+    .replace(/^([A-G][♭♯]?)m$/g, '$1 Minor')     // "Cm" → "C Minor"
+    .replace(/^([A-G][♭♯]?)M$/g, '$1 Major');    // "CM" → "C Major"
+  
+  return normalized;
+}
+
+/**
  * Base OpenAI completion function
  */
 export async function completion(
@@ -97,7 +130,14 @@ For tempo, provide BPM as a number. For duration, provide seconds as a number.`;
     : `Find information about the song "${songTitle}"`;
 
   const response = await completion(systemPrompt, userPrompt, { json: true });
-  return JSON.parse(response);
+  const parsed = JSON.parse(response);
+  
+  // Normalize key signature format
+  if (parsed.originalKey) {
+    parsed.originalKey = normalizeKeySignature(parsed.originalKey);
+  }
+  
+  return parsed;
 }
 
 /**
@@ -154,7 +194,14 @@ Current key: ${song.originalKey || 'unknown'}
 Current tempo: ${song.tempo || 'unknown'} BPM`;
 
   const response = await completion(systemPrompt, userPrompt, { json: true });
-  return JSON.parse(response);
+  const parsed = JSON.parse(response);
+  
+  // Normalize key signature format
+  if (parsed.keySignature) {
+    parsed.keySignature = normalizeKeySignature(parsed.keySignature);
+  }
+  
+  return parsed;
 }
 
 /**
@@ -274,6 +321,48 @@ Handle various formats like "Song Title by Artist in Key of X" or simple lists. 
   const response = await completion(systemPrompt, userPrompt, { json: true });
   const parsed = JSON.parse(response);
   return parsed.songs || parsed;
+}
+
+/**
+ * Get song suggestions for an artist
+ * Returns array of song titles that complement existing repertoire
+ */
+export async function getSuggestedSongs(
+  artistName: string,
+  existingSongs: string[]
+): Promise<string[]> {
+  const systemPrompt = `You are a music repertoire assistant specializing in helping artists build comprehensive song lists.
+Your task is to suggest popular, well-known songs that an artist commonly performs.`;
+
+  const existingList = existingSongs.length > 0 
+    ? `\n\nThe artist already has these songs:\n${existingSongs.join('\n')}`
+    : '';
+
+  const userPrompt = `Suggest 3-5 popular or commonly performed songs by ${artistName} that would complement their repertoire.${existingList}
+
+Focus on:
+- Well-known hits and signature songs
+- Songs they're famous for performing
+- Avoid suggesting songs already in their list
+
+Return ONLY the song titles, one per line, without numbering, explanations, or additional text.`;
+
+  const response = await completion(systemPrompt, userPrompt);
+  
+  // Parse response into array of titles, filter out empty lines
+  const suggestions = response
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0)
+    // Remove any numbering if present (1. , 1) , etc.)
+    .map(line => line.replace(/^\d+[\.)]\s*/, ''))
+    // Deduplicate against existing songs (case-insensitive)
+    .filter(title => {
+      const lowerTitle = title.toLowerCase();
+      return !existingSongs.some(existing => existing.toLowerCase() === lowerTitle);
+    });
+
+  return suggestions;
 }
 
 export { openai };

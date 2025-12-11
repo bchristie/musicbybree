@@ -1,7 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
-import { Music2, Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Music2, Plus, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -21,11 +24,70 @@ interface ArtistSongListProps {
 }
 
 export function ArtistSongList({ songs, artistName, artistId }: ArtistSongListProps) {
+  const router = useRouter();
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [addingTitle, setAddingTitle] = useState<string | null>(null);
+
+  const handleSelect = (songId: string) => {
+    router.push(`/admin/artists/${artistId}/songs/${songId}`);
+  };
+
   const formatDuration = (seconds: number | null): string => {
     if (!seconds) return "—";
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  const handleGetSuggestions = async () => {
+    setLoadingSuggestions(true);
+    setShowSuggestions(true);
+    try {
+      const response = await fetch(`/api/admin/artists/${artistId}/suggest-songs`, {
+        method: "POST",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to get suggestions");
+      }
+
+      const data = await response.json();
+      setSuggestions(data.suggestions || []);
+    } catch (error) {
+      toast.error("Failed to get song suggestions");
+      setShowSuggestions(false);
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
+
+  const handleQuickAdd = async (title: string) => {
+    setAddingTitle(title);
+    try {
+      const response = await fetch("/api/admin/songs/quick-add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ artistId, title }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to add song");
+      }
+
+      // Remove from suggestions
+      setSuggestions(prev => prev.filter(s => s !== title));
+      
+      toast.success(`Added "${title}" to repertoire`);
+      
+      // Refresh the data without losing state
+      router.refresh();
+    } catch (error) {
+      toast.error(`Failed to add "${title}"`);
+    } finally {
+      setAddingTitle(null);
+    }
   };
 
   if (songs.length === 0) {
@@ -37,15 +99,88 @@ export function ArtistSongList({ songs, artistName, artistId }: ArtistSongListPr
               <CardTitle>Songs</CardTitle>
               <CardDescription>Songs in your repertoire by {artistName}</CardDescription>
             </div>
-            <Button asChild size="sm">
-              <Link href={`/admin/artists/${artistId}/songs/new`}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Song
-              </Link>
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleGetSuggestions}
+                disabled={loadingSuggestions}
+              >
+                {loadingSuggestions ? (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2 animate-pulse" />
+                    Loading...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2" />
+                    Recommend
+                  </>
+                )}
+              </Button>
+              <Button asChild size="sm">
+                <Link href={`/admin/artists/${artistId}/songs/new`}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Song
+                </Link>
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
+          {/* Suggestions Section */}
+          {showSuggestions && (
+            <div className="mb-6 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
+                  Suggested Songs
+                </h4>
+                <button
+                  onClick={() => setShowSuggestions(false)}
+                  className="text-xs text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
+                >
+                  Close
+                </button>
+              </div>
+              {loadingSuggestions ? (
+                <div className="flex items-center justify-center py-8 text-sm text-zinc-500">
+                  <Sparkles className="w-4 h-4 mr-2 animate-pulse" />
+                  Getting suggestions...
+                </div>
+              ) : suggestions.length === 0 ? (
+                <p className="text-sm text-zinc-500 text-center py-4">
+                  No new suggestions available
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {suggestions.map((title) => (
+                    <div
+                      key={title}
+                      className="flex items-center justify-between p-3 bg-white dark:bg-zinc-800 rounded border border-zinc-200 dark:border-zinc-700"
+                    >
+                      <span className="text-sm text-zinc-900 dark:text-zinc-50">{title}</span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleQuickAdd(title)}
+                        disabled={addingTitle === title}
+                      >
+                        {addingTitle === title ? (
+                          <>Adding...</>
+                        ) : (
+                          <>
+                            <Plus className="w-4 h-4 mr-1" />
+                            Add
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <Music2 className="h-12 w-12 text-zinc-300 dark:text-zinc-700 mb-4" />
             <p className="text-sm text-zinc-500">No songs yet</p>
@@ -66,15 +201,80 @@ export function ArtistSongList({ songs, artistName, artistId }: ArtistSongListPr
             <CardTitle>Songs ({songs.length})</CardTitle>
             <CardDescription>Songs in your repertoire by {artistName}</CardDescription>
           </div>
-          <Button asChild size="sm">
-            <Link href={`/admin/artists/${artistId}/songs/new`}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Song
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleGetSuggestions}
+              disabled={loadingSuggestions}
+            >
+              {loadingSuggestions ? (
+                <>
+                  <Sparkles className="w-4 h-4 mr-2 animate-pulse" />
+                  Loading...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Recommend
+                </>
+              )}
+            </Button>
+            <Button asChild size="sm">
+              <Link href={`/admin/artists/${artistId}/songs/new`}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Song
+              </Link>
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
+        {/* Suggestions Section */}
+        {showSuggestions && (
+          <div className="mb-6 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800">
+            <h4 className="text-sm font-semibold mb-3 text-zinc-900 dark:text-zinc-50">
+              Suggested Songs
+            </h4>
+            {loadingSuggestions ? (
+              <div className="flex items-center justify-center py-8 text-sm text-zinc-500">
+                <Sparkles className="w-4 h-4 mr-2 animate-pulse" />
+                Getting suggestions...
+              </div>
+            ) : suggestions.length === 0 ? (
+              <p className="text-sm text-zinc-500 text-center py-4">
+                No new suggestions available
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {suggestions.map((title) => (
+                  <div
+                    key={title}
+                    className="flex items-center justify-between p-3 bg-white dark:bg-zinc-800 rounded border border-zinc-200 dark:border-zinc-700"
+                  >
+                    <span className="text-sm text-zinc-900 dark:text-zinc-50">{title}</span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleQuickAdd(title)}
+                      disabled={addingTitle === title}
+                    >
+                      {addingTitle === title ? (
+                        <>Adding...</>
+                      ) : (
+                        <>
+                          <Plus className="w-4 h-4 mr-1" />
+                          Add
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Desktop view */}
         <div className="hidden md:block rounded-md border">
           <Table>
@@ -112,15 +312,11 @@ export function ArtistSongList({ songs, artistName, artistId }: ArtistSongListPr
                 return (
                 <TableRow 
                   key={song.id} 
+                  onClick={() => handleSelect(song.id)}
                   className="cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900/50"
                 >
                   <TableCell className="font-medium">
-                    <Link 
-                      href={`/admin/artists/${artistId}/songs/${song.id}`}
-                      className="hover:underline"
-                    >
-                      {song.title}
-                    </Link>
+                    {song.title}
                     {getStatusBadge()}
                   </TableCell>
                   <TableCell>
