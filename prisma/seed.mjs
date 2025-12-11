@@ -38,6 +38,9 @@ async function main() {
 
   if (process.env.SEED_RESET === 'true') {
     console.log('Resetting database...');
+    // Delete in order to respect foreign key constraints
+    await prisma.repertoireEntry.deleteMany();
+    await prisma.performance.deleteMany();
     await prisma.songTag.deleteMany();
     await prisma.song.deleteMany();
     await prisma.tag.deleteMany();
@@ -313,6 +316,206 @@ async function main() {
   });
 
   console.log('Song created/updated:', loveIsALosingGame.title);
+
+  // Create repertoire entries for all seeded songs
+  console.log('Creating repertoire entries...');
+
+  // At Last - Featured song (romantic standard)
+  await prisma.repertoireEntry.upsert({
+    where: { songId: atLast.id },
+    update: {
+      status: 'FEATURED',
+      performedKey: 'F',
+      performedTempo: 60,
+      typicalDuration: 180,
+      notes: 'Classic opener for romantic sets. Guitar fingerstyle intro, build to full arrangement.',
+      arrangement: 'Intro-Verse-Chorus-Verse-Chorus-Bridge-Chorus-Outro',
+      difficulty: 2,
+      vocallyDemanding: false,
+      energyLevel: 2,
+      worksWellFor: 'weddings, romantic dinners, jazz clubs',
+      lastPracticed: new Date(),
+      practiceCount: 50,
+      performanceCount: 25,
+    },
+    create: {
+      songId: atLast.id,
+      status: 'FEATURED',
+      performedKey: 'F',
+      performedTempo: 60,
+      typicalDuration: 180,
+      notes: 'Classic opener for romantic sets. Guitar fingerstyle intro, build to full arrangement.',
+      arrangement: 'Intro-Verse-Chorus-Verse-Chorus-Bridge-Chorus-Outro',
+      difficulty: 2,
+      vocallyDemanding: false,
+      energyLevel: 2,
+      worksWellFor: 'weddings, romantic dinners, jazz clubs',
+      addedAt: new Date('2024-01-15'),
+      lastPracticed: new Date(),
+      practiceCount: 50,
+      performanceCount: 25,
+    },
+  });
+
+  // Valerie - Featured upbeat song
+  await prisma.repertoireEntry.upsert({
+    where: { songId: valerie.id },
+    update: {
+      status: 'FEATURED',
+      performedKey: 'C',
+      performedTempo: 124,
+      typicalDuration: 220,
+      notes: 'Crowd favorite! Keep it energetic, encourage audience participation on chorus.',
+      arrangement: 'Intro-Verse-Chorus-Verse-Chorus-Bridge-Chorus x2-Outro',
+      difficulty: 3,
+      vocallyDemanding: true,
+      energyLevel: 5,
+      worksWellFor: 'corporate events, parties, festivals',
+      lastPracticed: new Date(),
+      practiceCount: 45,
+      performanceCount: 30,
+    },
+    create: {
+      songId: valerie.id,
+      status: 'FEATURED',
+      performedKey: 'C',
+      performedTempo: 124,
+      typicalDuration: 220,
+      notes: 'Crowd favorite! Keep it energetic, encourage audience participation on chorus.',
+      arrangement: 'Intro-Verse-Chorus-Verse-Chorus-Bridge-Chorus x2-Outro',
+      difficulty: 3,
+      vocallyDemanding: true,
+      energyLevel: 5,
+      worksWellFor: 'corporate events, parties, festivals',
+      addedAt: new Date('2024-02-01'),
+      lastPracticed: new Date(),
+      practiceCount: 45,
+      performanceCount: 30,
+    },
+  });
+
+  // Back to Black - Ready
+  await prisma.repertoireEntry.upsert({
+    where: { songId: backToBlack.id },
+    update: {},
+    create: {
+      songId: backToBlack.id,
+      status: 'READY',
+      performedKey: 'Dm',
+      performedTempo: 98,
+      typicalDuration: 240,
+      notes: 'Soulful and moody. Focus on vocal expression, less is more on instrumentation.',
+      arrangement: 'Intro-Verse-Chorus-Verse-Chorus-Bridge-Chorus-Outro',
+      difficulty: 4,
+      vocallyDemanding: true,
+      energyLevel: 2,
+      worksWellFor: 'jazz clubs, intimate venues',
+      avoidAfter: "Don't follow with another slow song",
+      addedAt: new Date('2024-03-10'),
+      lastPracticed: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+      practiceCount: 20,
+      performanceCount: 8,
+    },
+  });
+
+  // Rehab - Featured powerful song
+  await prisma.repertoireEntry.upsert({
+    where: { songId: rehab.id },
+    update: {
+      status: 'FEATURED',
+      performedKey: 'G',
+      performedTempo: 118,
+      typicalDuration: 210,
+      notes: 'High energy! Strong brass section if available, otherwise emphasize guitar riff.',
+      arrangement: 'Intro-Verse-Chorus-Verse-Chorus-Bridge-Chorus x2',
+      difficulty: 4,
+      vocallyDemanding: true,
+      energyLevel: 5,
+      worksWellFor: 'festivals, larger venues, upbeat sets',
+      lastPracticed: new Date(),
+      practiceCount: 35,
+      performanceCount: 18,
+    },
+    create: {
+      songId: rehab.id,
+      status: 'FEATURED',
+      performedKey: 'G',
+      performedTempo: 118,
+      typicalDuration: 210,
+      notes: 'High energy! Strong brass section if available, otherwise emphasize guitar riff.',
+      arrangement: 'Intro-Verse-Chorus-Verse-Chorus-Bridge-Chorus x2',
+      difficulty: 4,
+      vocallyDemanding: true,
+      energyLevel: 5,
+      worksWellFor: 'festivals, larger venues, upbeat sets',
+      addedAt: new Date('2024-02-20'),
+      lastPracticed: new Date(),
+      practiceCount: 35,
+      performanceCount: 18,
+    },
+  });
+
+  // Tears Dry on Their Own - Ready
+  await prisma.repertoireEntry.upsert({
+    where: { songId: tears.id },
+    update: {},
+    create: {
+      songId: tears.id,
+      status: 'READY',
+      performedKey: 'A',
+      performedTempo: 104,
+      typicalDuration: 180,
+      notes: 'Smooth Motown groove. Keep the rhythm tight, less vocal runs, stay true to melody.',
+      arrangement: 'Intro-Verse-Chorus-Verse-Chorus-Bridge-Chorus-Outro',
+      difficulty: 3,
+      vocallyDemanding: false,
+      energyLevel: 3,
+      worksWellFor: 'background music, brunch sets, casual venues',
+      addedAt: new Date('2024-03-25'),
+      lastPracticed: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 1 week ago
+      practiceCount: 15,
+      performanceCount: 5,
+    },
+  });
+
+  // Love Is a Losing Game - Learning (newest addition)
+  await prisma.repertoireEntry.upsert({
+    where: { songId: loveIsALosingGame.id },
+    update: {
+      status: 'LEARNING',
+      performedKey: 'F',
+      performedTempo: 70,
+      typicalDuration: 155,
+      notes: 'Still working on the emotional delivery. Stripped arrangement - voice and minimal accompaniment.',
+      arrangement: 'Verse-Chorus-Verse-Chorus-Bridge-Chorus',
+      difficulty: 5,
+      vocallyDemanding: true,
+      energyLevel: 1,
+      worksWellFor: 'intimate settings, acoustic sets',
+      lastPracticed: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+      practiceCount: 8,
+      performanceCount: 0,
+    },
+    create: {
+      songId: loveIsALosingGame.id,
+      status: 'LEARNING',
+      performedKey: 'F',
+      performedTempo: 70,
+      typicalDuration: 155,
+      notes: 'Still working on the emotional delivery. Stripped arrangement - voice and minimal accompaniment.',
+      arrangement: 'Verse-Chorus-Verse-Chorus-Bridge-Chorus',
+      difficulty: 5,
+      vocallyDemanding: true,
+      energyLevel: 1,
+      worksWellFor: 'intimate settings, acoustic sets',
+      addedAt: new Date('2024-11-01'),
+      lastPracticed: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+      practiceCount: 8,
+      performanceCount: 0,
+    },
+  });
+
+  console.log('Repertoire entries created/updated for all songs!');
 
   console.log('Seed completed successfully!');
 }
