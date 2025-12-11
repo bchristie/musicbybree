@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -137,15 +138,18 @@ export function ArtistForm({ artist, onSave }: ArtistFormProps) {
         // Navigate based on mode
         if (isNew) {
           if (continueCreating) {
+            toast.success("Artist saved successfully");
             // Reset form and stay on create page
             resetForm();
           } else {
+            toast.success("Artist created successfully");
             // Navigate to the artist detail page
             router.push(`/admin/artists/${result.artist.id}`);
           }
         } else {
-          router.refresh();
+          toast.success("Artist updated successfully");
         }
+        // For existing artist edits, no action needed - state is already updated
       }
     } catch (error) {
       console.error("Save failed:", error);

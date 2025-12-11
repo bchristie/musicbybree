@@ -108,13 +108,12 @@ export function RepertoireManager({
         throw new Error("Failed to update repertoire");
       }
 
-      router.refresh();
       return true;
     } catch (error) {
       toast.error("Failed to update repertoire");
       return false;
     }
-  }, [songId, router]);
+  }, [songId]);
 
   const handleAddToRepertoire = async () => {
     setIsAdding(true);
@@ -179,7 +178,6 @@ export function RepertoireManager({
       }
 
       toast.success("Practice session logged");
-      router.refresh();
     } catch (error) {
       toast.error("Failed to log practice");
     } finally {

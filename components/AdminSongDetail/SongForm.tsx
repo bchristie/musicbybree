@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -153,6 +154,7 @@ export function SongForm({ song, artistId, artistName, tags, artists }: SongForm
       const savedSong = await response.json();
 
       if (andContinue) {
+        toast.success("Song saved successfully");
         // Reset form for new entry
         setFormData({
           title: "",
@@ -165,18 +167,14 @@ export function SongForm({ song, artistId, artistName, tags, artists }: SongForm
           genre: undefined,
           mood: undefined,
         });
+      } else if (!song) {
+        toast.success("Song created successfully");
+        // New song - navigate to song detail page
+        router.push(`/admin/artists/${formData.artistId}/songs/${savedSong.id}`);
       } else {
-        // Navigate to song detail page (for new songs) or artist detail (for edits)
-        if (song) {
-          // Editing existing song - go back to artist
-          router.push(`/admin/artists/${formData.artistId}`);
-        } else {
-          // New song - go to song detail page
-          router.push(`/admin/artists/${formData.artistId}/songs/${savedSong.id}`);
-        }
+        toast.success("Song updated successfully");
       }
-      
-      router.refresh();
+      // For existing song edits, no action needed - state is already updated
     } catch (err) {
       setErrors({
         submit: err instanceof Error ? err.message : "An error occurred",
