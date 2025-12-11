@@ -14,15 +14,15 @@ interface LyricLineProps {
 }
 
 // Convert seconds to MM:SS.s format
-function formatTime(seconds: number | undefined): string {
-  if (seconds === undefined) return "";
+function formatTime(seconds: number | null | undefined): string {
+  if (seconds === undefined || seconds === null) return "";
   const mins = Math.floor(seconds / 60);
   const secs = (seconds % 60).toFixed(1);
   return `${mins}:${secs.padStart(4, '0')}`;
 }
 
 // Convert MM:SS.s to seconds
-function parseTime(timeStr: string): number | undefined {
+function parseTime(timeStr: string): number | null | undefined {
   if (!timeStr.trim()) return undefined;
   const parts = timeStr.split(':');
   if (parts.length !== 2) return undefined;

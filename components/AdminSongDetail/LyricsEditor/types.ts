@@ -5,7 +5,7 @@
 export type LyricLineData = {
   id?: string;
   text: string;
-  time?: number;
+  time?: number | null;
   order: number;
   breakAfter?: boolean;
 };
@@ -13,6 +13,6 @@ export type LyricLineData = {
 export type LyricsData = {
   id?: string;
   hasTiming: boolean;
-  source?: string;
+  source?: string | null;
   lines: LyricLineData[];
 };
