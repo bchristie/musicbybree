@@ -13,11 +13,6 @@ export const metadata = {
 export default async function RepertoirePage() {
   const songs = await songRepo.findForRepertoire();
 
-  // Debug: Log all songs to check featured status
-  songs.forEach(song => {
-    console.log(`${song.title}: status=${song.repertoireEntry?.status}`);
-  });
-
   return (
     <Suspense fallback={<RepertoireLoading />}>
       <PublicSongList songs={songs} />
