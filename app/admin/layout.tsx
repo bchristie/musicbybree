@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import Link from "next/link";
+import { Toaster } from "sonner";
 
 export default async function AdminLayout({
   children,
@@ -80,6 +81,7 @@ export default async function AdminLayout({
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
       </main>
+      <Toaster />
     </div>
   );
 }

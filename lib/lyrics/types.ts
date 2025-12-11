@@ -8,6 +8,7 @@ export interface LyricLine {
   text: string;
   time?: number; // Timestamp in seconds (optional for untimed lyrics)
   order: number; // Line number for display ordering
+  breakAfter?: boolean; // Add spacing after this line (for untimed lyrics)
 }
 
 export interface LyricsResult {

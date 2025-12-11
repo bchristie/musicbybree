@@ -62,6 +62,15 @@ export const songRepo = {
             performance: true,
           },
         },
+        lyric: {
+          include: {
+            lines: {
+              orderBy: {
+                order: 'asc',
+              },
+            },
+          },
+        },
       },
     });
   },

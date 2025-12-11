@@ -219,11 +219,12 @@ model Lyric {
 }
 
 model LyricLine {
-  id       String  @id @default(cuid())
-  lyricId  String
-  time     Float?  // Seconds from start (null if hasTiming is false)
-  text     String
-  order    Int     // Line number for display order
+  id         String  @id @default(cuid())
+  lyricId    String
+  time       Float?  // Seconds from start (null if hasTiming is false)
+  text       String
+  order      Int     // Line number for display order
+  breakAfter Boolean @default(false) // Add spacing after this line (for untimed lyrics)
 
   lyric Lyric @relation(fields: [lyricId], references: [id], onDelete: Cascade)
 

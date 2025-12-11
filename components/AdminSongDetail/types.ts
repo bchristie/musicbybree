@@ -24,6 +24,18 @@ export type SongDetailData = {
       color: string | null;
     };
   }>;
+  lyric?: {
+    id: string;
+    hasTiming: boolean;
+    source: string | null;
+    lines: Array<{
+      id: string;
+      text: string;
+      time: number | null;
+      order: number;
+      breakAfter: boolean;
+    }>;
+  } | null;
   repertoireEntry?: {
     status: string;
     performedKey: string | null;

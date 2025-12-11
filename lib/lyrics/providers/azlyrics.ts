@@ -1,4 +1,3 @@
-import { JSDOM } from "jsdom";
 import {
   LyricsProvider,
   LyricsResult,
@@ -43,26 +42,48 @@ export class AZLyricsProvider extends LyricsProvider {
       }
 
       const html = await response.text();
-      const { document: doc } = new JSDOM(html).window;
+      
+      // Use cheerio for HTML parsing (ESM-compatible)
+      const cheerio = await import("cheerio");
+      const $ = cheerio.load(html);
       
       // AZLyrics stores lyrics in a specific div structure
-      const div = doc.querySelector(
-        'div.main-page > div.row > div.text-center > div:not([class])'
-      );
+      const div = $('div.main-page > div.row > div.text-center > div:not([class])');
 
-      if (!div || !div.textContent) {
+      if (!div.length || !div.text()) {
         console.warn(`[AZLyrics] No lyrics found for ${artist} - ${title}`);
         return null;
       }
 
-      // Clean up the text
-      const cleanedText = (div.textContent || '')
-        .trim()
-        .replace(/^\[(.+)\]$/gm, '**[$1]**') // Bold section markers like [Chorus]
-        .replace(/(\n(?!\n))/gm, '\\\n')      // Preserve line breaks
-        .replace(/^\\$/gm, '');                // Remove standalone backslashes
-
-      const lines = this.parseTextLines(cleanedText);
+      // Get the raw text and split into lines
+      const rawText = div.text().trim();
+      const textLines = rawText.split('\n');
+      
+      // Parse lines and detect paragraph breaks (blank lines)
+      const lines = [];
+      let order = 1;
+      
+      for (let i = 0; i < textLines.length; i++) {
+        const text = textLines[i].trim();
+        
+        // Skip completely empty lines
+        if (!text) continue;
+        
+        // Check if next line is empty (paragraph break)
+        const nextLineEmpty = i + 1 < textLines.length && !textLines[i + 1].trim();
+        const hasMoreContent = textLines.slice(i + 2).some(line => line.trim());
+        
+        lines.push({
+          text,
+          order: order++,
+          breakAfter: nextLineEmpty && hasMoreContent, // Add break if next is empty and there's more content
+        });
+        
+        // Skip the blank line we just detected
+        if (nextLineEmpty) {
+          i++;
+        }
+      }
 
       return {
         lines,
