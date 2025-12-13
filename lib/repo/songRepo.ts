@@ -35,6 +35,7 @@ export const songRepo = {
         } : undefined,
         repertoireEntry: includeRepertoireEntry ? {
           select: {
+            id: true,
             status: true,
           },
         } : undefined,
