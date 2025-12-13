@@ -1,4 +1,5 @@
-import { notFound } from "next/navigation";
+import { auth } from "@/auth";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { AdminSongDetail } from "@/components/AdminSongDetail";
 import { artistRepo } from "@/lib/repo/artistRepo";
@@ -11,6 +12,12 @@ interface PageProps {
 }
 
 export default async function NewSongPage({ params }: PageProps) {
+  const session = await auth();
+  
+  if (!session) {
+    redirect("/admin/login");
+  }
+
   const { id: artistId } = await params;
 
   const [artist, allTags, allArtists] = await Promise.all([

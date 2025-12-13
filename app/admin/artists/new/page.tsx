@@ -1,9 +1,16 @@
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 import { AdminArtistDetail } from "@/components/AdminArtistDetail";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-export default function NewArtistPage() {
+export default async function NewArtistPage() {
+  const session = await auth();
+  
+  if (!session) {
+    redirect("/admin/login");
+  }
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
       <div className="mb-6">

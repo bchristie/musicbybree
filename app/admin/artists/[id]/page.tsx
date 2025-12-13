@@ -1,4 +1,5 @@
-import { notFound } from "next/navigation";
+import { auth } from "@/auth";
+import { notFound, redirect } from "next/navigation";
 import { artistRepo } from "@/lib/repo/artistRepo";
 import { songRepo } from "@/lib/repo/songRepo";
 import { AdminArtistDetail } from "@/components/AdminArtistDetail";
@@ -11,6 +12,12 @@ interface ArtistDetailPageProps {
 }
 
 export default async function ArtistDetailPage({ params }: ArtistDetailPageProps) {
+  const session = await auth();
+  
+  if (!session) {
+    redirect("/admin/login");
+  }
+
   const { id } = await params;
   
   // Fetch artist with song count
