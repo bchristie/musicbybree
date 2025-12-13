@@ -159,9 +159,13 @@ export function ArtistListProvider({ initialArtists, children }: ArtistListProvi
       );
     }
 
-    // Apply genre filter
+    // Apply genre filter (handles comma-separated genres)
     if (localFilters.genre) {
-      filtered = filtered.filter(artist => artist.genre === localFilters.genre);
+      filtered = filtered.filter(artist => {
+        if (!artist.genre) return false;
+        const artistGenres = artist.genre.split(',').map(g => g.trim());
+        return artistGenres.includes(localFilters.genre);
+      });
     }
 
     // Apply era filter

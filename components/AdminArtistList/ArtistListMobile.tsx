@@ -34,11 +34,18 @@ export function ArtistListMobile() {
                 {artist.name}
               </h3>
               <div className="flex items-center gap-2 mt-1 flex-wrap">
-                {artist.genre && (
-                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                    {artist.genre}
-                  </span>
-                )}
+                {artist.genre &&
+                  artist.genre.split(',').map((g, i) => {
+                    const genre = g.trim();
+                    return genre ? (
+                      <span
+                        key={i}
+                        className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+                      >
+                        {genre}
+                      </span>
+                    ) : null;
+                  })}
                 {artist.era && (
                   <span className="text-xs text-zinc-600 dark:text-zinc-400">
                     {artist.era}

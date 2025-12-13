@@ -49,7 +49,7 @@ export function ArtistListDesktop() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[40%]">
+            <TableHead className="w-[60%]">
               <Button
                 variant="ghost"
                 onClick={() => handleSort("name")}
@@ -57,16 +57,6 @@ export function ArtistListDesktop() {
               >
                 Artist Name
                 {getSortIcon("name")}
-              </Button>
-            </TableHead>
-            <TableHead className="w-[20%]">
-              <Button
-                variant="ghost"
-                onClick={() => handleSort("genre")}
-                className="-ml-4 h-8 data-[state=open]:bg-accent"
-              >
-                Genre
-                {getSortIcon("genre")}
               </Button>
             </TableHead>
             <TableHead className="w-[20%]">
@@ -94,7 +84,7 @@ export function ArtistListDesktop() {
         <TableBody>
           {filteredArtists.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={4} className="h-24 text-center text-zinc-500">
+              <TableCell colSpan={3} className="h-24 text-center text-zinc-500">
                 No artists found
               </TableCell>
             </TableRow>
@@ -105,15 +95,27 @@ export function ArtistListDesktop() {
                 onClick={() => handleSelect(artist.id)}
                 className="cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-900/50"
               >
-                <TableCell className="font-medium">{artist.name}</TableCell>
                 <TableCell>
-                  {artist.genre ? (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                      {artist.genre}
-                    </span>
-                  ) : (
-                    <span className="text-zinc-400 text-sm">—</span>
-                  )}
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="font-medium text-zinc-900 dark:text-zinc-100">
+                      {artist.name}
+                    </div>
+                    {artist.genre && (
+                      <div className="flex flex-wrap gap-0.5 justify-end">
+                        {artist.genre.split(',').map((g, i) => {
+                          const genre = g.trim();
+                          return genre ? (
+                            <span
+                              key={i}
+                              className="inline-flex items-center px-1.5 py-0.5 rounded text-[0.65rem] font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+                            >
+                              {genre}
+                            </span>
+                          ) : null;
+                        })}
+                      </div>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell>
                   {artist.era ? (

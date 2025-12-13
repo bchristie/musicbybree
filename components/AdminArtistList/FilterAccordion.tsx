@@ -28,7 +28,13 @@ export function FilterAccordion() {
     const eras = new Set<string>();
 
     artists.forEach((artist) => {
-      if (artist.genre) genres.add(artist.genre);
+      // Parse comma-separated genres into individual items
+      if (artist.genre) {
+        artist.genre.split(',').forEach(g => {
+          const trimmed = g.trim();
+          if (trimmed) genres.add(trimmed);
+        });
+      }
       if (artist.era) eras.add(artist.era);
     });
 
